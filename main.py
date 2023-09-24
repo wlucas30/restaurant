@@ -14,7 +14,7 @@ app = Flask(__name__)
 # This determines which page must be requested to call main()
 @app.route("/restaurant")
 def main():
-    return "This is a web app"
+    return "Here are some details that you have received"
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8080)
+    app.run(host="localhost", port=8080)

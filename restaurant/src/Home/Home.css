@@ -1,0 +1,54 @@
+.homeBody {
+    padding: 2%;
+    padding-top: 7%;
+}
+
+.homeTitle {
+    font-size: 150%;
+    font-weight: 600;
+}
+
+.locationPicker {
+    width: max-content;
+    margin-top: 1vh;
+    margin-bottom: 3vh;
+    padding: 3px;
+    border: 1px solid grey;
+    border-radius: 7px;
+    font-size: 100%;
+}
+
+.locationArrow {
+    font-size: 75%;
+    margin-right:4px;
+}
+
+.restaurantContainer {
+    border: 1px solid grey;
+    border-radius: 7px;
+    padding: 3px;
+    width: 95vw;
+    margin-bottom: 2vh;
+}
+
+.restaurantName {
+    font-size: 120%;
+    font-weight: 500;
+}
+
+.restaurantDescription {
+    color: grey;
+    font-size: 80%;
+    font-weight: 350;
+}
+
+.restaurantImageContainer {
+    display: flex;
+    justify-content: center;;
+}
+
+.restaurantImage {
+    margin-top: 5px;
+    width: 95vw;
+    border-radius: 7px;
+}

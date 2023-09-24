@@ -1,0 +1,33 @@
+.topbar {
+    display: table;
+    background-color: rgb(50, 36, 127);
+    height: 8vh;
+    width: 100vw;
+
+    border-bottom: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: grey;
+
+    padding: 0;
+}
+
+.topbarTitle {
+    display: table-cell;
+    vertical-align: middle;
+    width: 85vw;
+
+    color: white;
+    font-size: large;
+    font-weight: 800;
+
+    padding-left: 2vw;
+}
+
+.userButton {
+    display: table-cell;
+    vertical-align: middle;
+    color: white;
+    height: 8vh;
+
+    padding-right: 2vw;
+}
