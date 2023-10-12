@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaLocationArrow } from 'react-icons/fa';
 import "./Home.css";
 
+// Initialise variables for storing user location data
 var latitude;
 var longitude;
 
@@ -23,6 +24,8 @@ function LocationPicker() {
 					const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
 					const data = await response.json();
 
+					// Sometimes there is no city or town available, so we must check if it is available before using it
+					// This uses city -> town -> municipality in order of priority
 					if (data.address) {
 						if (data.address.city) {
 							setCityName(data.address.city);
@@ -71,6 +74,7 @@ function Restaurant({ restaurantName, restaurantDescription, imageName }) {
 function RestaurantList() {
 	// This component displays a list of nearby restaurants
 	return (
+		// Currently populated with manual data, must change so this component dynamically updates
 		<div>
 			<Restaurant restaurantName="Will's Kitchen" restaurantDescription="0.25 miles away" imageName="1.jpeg" />
 			<Restaurant restaurantName="Savory Haven Grill" restaurantDescription="2.3 miles away" imageName="2.jpeg" />
