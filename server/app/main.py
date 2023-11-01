@@ -1,98 +1,64 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+from flask import Flask, request, jsonify
+from services.nearby_restaurants import getNearbyRestaurants, getRandomRestaurants
 
-from flask import Flask, request
-import json
-import mysql.connector
-from mysql.connector import Error
-from geopy import distance
+# This sets the app name
+app = Flask("tableNest")
 
-# This sets the app name to the same name as this file
-app = Flask(__name__)
-
-# This determines which page must be requested to call main()
 @app.route("/nearbyRestaurants", methods=["POST"])
-def main():
-    # This function should take the input parameters of Latitude and Longitude,
-    # then return the 10 nearest restaurants in ascending order of distance
-    # by retrieving these from the database.
+def nearbyRestaurants():
+    """
+    This function takes an input from the POST request, user location.
+    It then calls the nearby_restaurants service which finds the nearest 10 (at most)
+    restaurants, which will be returned to the client in JSON format.
+    """
     
-    # Indicates JSON format for the HTTP request response
-    print("Content-Type: application/json\n")
+    # Prepares response to be returned to the client
+    response = {
+        "restaurants" : None,
+        "error" : None
+    }
     
-    # Converts request parameters from JSON to Python format
-    data = request.json
-    
-    # Initialise empty dictionary for restaurants and their distances from the user
-    # Key:Value = restaurantID:distance
-    distance_dict = {}
-    
-    # Initialise connection to the database
-    connection = connect_db()
-    
-    with connection:
-        with connection.cursor() as cursor:
-            # Retrieve all records from Restaurant table
-            sql = "SELECT restaurantID, location FROM Restaurant"
-            cursor.execute(sql)
-            
-            # Iterate through each returned restaurant record
-            for row in cursor:
-                restaurantID, location = row["restaurantID"], row["location"]
-                
-                # Location is in format (latitude,longitude)
-                # Find position of the seperator between latitude and longitude
-                seperator_index = location.index(",")
-                
-                # Seperate location into latitude and longitude
-                latitude, longitude = location[1:seperator_index], location[seperator_index+1:-1]
-                
-                # Calculate distance between user and restaurant
-                distance = distance_calc(latitude, longitude, data["latitude"], data["longitude"])
-                
-                # Add distance to the dictionary
-                distance_dict[restaurantID] = distance
-        
-        # Close connection
-        connection.close()
-    
-    # Order the restaurants by distance in ascending order (returns only closest 10)
-    restaurants = order_restaurants(distance_dict)
-    
-    # Serialise the restaurants array as JSON for returning to the front-end
-    restaurants_json = json.dumps(restaurants)
-    
-    # Output the restaurants to the front-end
-    print(restaurants_json)
-
-# This function calculates the distance between two sets of coordinates
-def distance_calc(lat1, lon1, lat2, lon2):
-    coords_1, coords_2 = (lat1, lon1), (lat2, lon2)
-    
-    return distance.geodesic(coords_1, coords_2).miles
-
-# Sorts a dictionary of format {restaurantID:distance} in ascending order of distance,
-# returning only the closest 10 values
-def order_restaurants(distance_dict):
-    return "Code here"
-
-# This function attempts to create a connection with the database and returns the connection if successful
-def connect_db():
-    # Initialise connection
-    connection = None
-    
-    # Catch any errors connecting to database
+    # Attempts to convert POST request parameters from JSON to Python format
+    latitude, longitude, random = None, None, False
     try:
-        connection = mysql.connector.connect(
-            host="localhost",
-            user="tablenest",
-            passwd="gGLm]baH-u(Q)m0(",
-            database="restaurant"
-        )
-    except Error as e:
-        print("Database connection failed:", e)
+        data = request.json
+        latitude, longitude, random = data["latitude"], data["longitude"], data["random"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
     
-    return connection
-
+    if not random:
+        # Get array of nearby restaurants and their respective distances
+        distances = getNearbyRestaurants((latitude, longitude))
+        
+        if distances[0] is not None:
+            # No error has occurred
+            response["restaurants"] = distances[0]
+            
+            return jsonify(response)
+        else:
+            # An error has occurred, stop execution here and return it to the client
+            response["error"] = distances[1]
+            
+            return jsonify(response)
+    else:
+        # No location is provided, so return random restaurants
+        randomRestaurants = getRandomRestaurants()
+        
+        # Encode the function output into the response 
+        response["restaurants"], response["error"] = randomRestaurants
+        
+        return jsonify(response)
+    
+# This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)

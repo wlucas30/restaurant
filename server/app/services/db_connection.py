@@ -4,7 +4,7 @@ import mysql.connector
 
 # This function retrieves the database password securely from the environment
 def getDbPassword():
-    # Initialise the environment variables
+    # Initialise the environment variable from the .env file
     load_dotenv()
     
     password, error = None, None
@@ -14,6 +14,7 @@ def getDbPassword():
         # An error has occurred retrieving the password
         error = "An error occurred retrieving the database credentials"
     
+    # Returns a tuple containing the password or any caught error
     return password, error
 
 # This function attempts to create a connection with the database
@@ -24,12 +25,12 @@ def connect():
     # Attempt to retrieve database credentials
     password = getDbPassword()
     
-    # Check if any errors occurred
+    # Check if any errors occurred. If they did, return the error message
     if password[0] != None:
         # Remove blank error message from password
         password = password[0]
         
-        # Connection is nested in a try statement to catch any errors during connection
+        # Connection process is nested in a try statement to catch any errors during connection
         try:
             connection = mysql.connector.connect(
                 host = "localhost",
@@ -38,7 +39,7 @@ def connect():
                 database = "restaurant"
             )
         except mysql.connector.Error as e:
-            # Error message is substituted into the string
+            # Error message is substituted into the string to be returned
             error = f"Database connection failed: {e}"
         
         # Returns a tuple containing the connection object or any error
