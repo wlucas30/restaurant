@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from services.nearby_restaurants import getNearbyRestaurants, getRandomRestaurants
 from services.restaurant_details import getRestaurantDetails
+from models.user import User
 
 # This sets the app name
 app = Flask("tableNest")
@@ -98,7 +99,56 @@ def restaurantDetails():
         # An error has occured
         response["error"] = details[1]
         return jsonify(response)
+
+@app.route("/beginVerification", methods=["POST"])
+def checkAccount():
+    """
+    This function takes an email address and checks whether an account with this email already exists
+    If it doesn't then a new one will be created.
+    Then, a verification email will be sent to the provided email.
+    """
+    
+    # Prepares response to be returned to the client
+    response = {
+        "success" : False,
+        "error" : None
+    }
+    
+    # Attempts to convert POST request parameters from JSON to Python format
+    email, name = None, None
+    try:
+        data = request.json
+        email, name = data["email"], data["name"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    # Initalise a new User object
+    account = User(email, name)
+    if account.error is not None:
+        # An error has occurred, add it to the response
+        response["error"] = account.error
+        return jsonify(response)
+    else:
+        response["success"] = True
+    
+    # Send verification code to provided email address
+    # email verificaiton servcie.,.
+    
+    return jsonify(response)
+    
     
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)
+    
+    
