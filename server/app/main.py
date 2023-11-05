@@ -138,11 +138,12 @@ def checkAccount():
         # An error has occurred, add it to the response
         response["error"] = account.error
         return jsonify(response)
-    else:
-        response["success"] = True
     
-    # Send verification code to provided email address
-    # email verificaiton servcie.,.
+    # Initiate email verification
+    # Service call here
+    
+    # If success
+    response["success"] = True
     
     return jsonify(response)
     
