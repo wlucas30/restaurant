@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from services.nearby_restaurants import getNearbyRestaurants, getRandomRestaurants
 from services.restaurant_details import getRestaurantDetails
+from services.email_verification import beginVerification
 from models.user import User
 
 # This sets the app name
@@ -140,16 +141,16 @@ def checkAccount():
         return jsonify(response)
     
     # Initiate email verification
-    # Service call here
+    verification = beginVerification(account.userID)
     
-    # If success
-    response["success"] = True
-    
-    return jsonify(response)
-    
+    if not verification[0]:
+        # An error has occurred, return the error message
+        response["error"] = verification[1]
+        return jsonify(response)
+    else:
+        response["success"] = True
+        return jsonify(response)
     
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)
-    
-    

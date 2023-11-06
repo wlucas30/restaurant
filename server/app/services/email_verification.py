@@ -51,6 +51,9 @@ def beginVerification(userID):
                 if not emailed[0]:
                     # An error occurred, return the error message
                     return emailed
+                else:
+                    # No error has occurred, so return success message
+                    return (True, None)
     else:
         # An error has occurred, return the error message
         return (False, connection[1])
@@ -59,7 +62,7 @@ def beginVerification(userID):
 def generateCode():
     code = ""
     for _ in range(6): # length of code
-        code += str(randint(1, 10))
+        code += str(randint(0, 10))
     return code
         
 # This function sends an email containing the provided code to the provided address
