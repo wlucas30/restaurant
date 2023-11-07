@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from services.nearby_restaurants import getNearbyRestaurants, getRandomRestaurants
 from services.restaurant_details import getRestaurantDetails
 from services.email_verification import beginVerification
+from services.check_verification import checkVerificationCode
 from models.user import User
 
 # This sets the app name
@@ -151,6 +152,48 @@ def checkAccount():
         response["success"] = True
         return jsonify(response)
     
+@app.route("/checkCode", methods=["POST"])
+def checkCode():
+    """
+    This function takes a userID and verification code, and checks if the provided
+    code is valid and not expired.
+    """
+    
+    # Prepares response to be returned to the client
+    response = {
+        "success" : False,
+        "error" : None
+    }
+    
+    # Attempts to convert POST request parameters from JSON to Python format
+    userID, code = None, None
+    try:
+        data = request.json
+        userID, code = data["userID"], data["code"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    verification = checkVerificationCode(userID, code)
+    
+    if verification[0]:
+        # The verification has succeeded
+        response["success"] = True
+    else:
+        # Verification failed, or an error occurred
+        response["error"] = verification[1]
+    
+    return jsonify(response)
+
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)
