@@ -3,6 +3,7 @@ from services.nearby_restaurants import getNearbyRestaurants, getRandomRestauran
 from services.restaurant_details import getRestaurantDetails
 from services.email_verification import beginVerification
 from services.check_verification import checkVerificationCode
+from services.auth_token import getAuthToken
 from models.user import User
 
 # This sets the app name
@@ -195,7 +196,16 @@ def checkCode():
     if verification[0]:
         # The verification has succeeded, generate a new AuthToken
         response["success"] = True
-        # auth token service here
+        
+        # Returns plaintext authorisation token
+        auth = getAuthToken(userID)
+        
+        if auth[0] is not None:
+            response["authToken"] = auth[0]
+        else:
+            # An error has occurred
+            response["success"] = False
+            response["error"] = auth[1]
     else:
         # Verification failed, or an error occurred
         response["error"] = verification[1]
