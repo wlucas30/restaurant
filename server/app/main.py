@@ -152,18 +152,25 @@ def checkAccount():
         response["success"] = True
         return jsonify(response)
     
-@app.route("/checkCode", methods=["POST"])
+@app.route("/getAuthToken", methods=["POST"])
 def checkCode():
     """
     This function takes a userID and verification code, and checks if the provided
     code is valid and not expired.
+    If the code is valid, an AuthToken is returned.
     """
     
     # Prepares response to be returned to the client
     response = {
         "success" : False,
+        "authToken" : None,
         "error" : None
     }
+    
+    # Only accept SSL connections as we are returning sensitive information
+    if not request.is_secure:
+        response["error"] = "This service can only be accessed using SSL."
+        return jsonify(response)
     
     # Attempts to convert POST request parameters from JSON to Python format
     userID, code = None, None
@@ -186,8 +193,9 @@ def checkCode():
     verification = checkVerificationCode(userID, code)
     
     if verification[0]:
-        # The verification has succeeded
+        # The verification has succeeded, generate a new AuthToken
         response["success"] = True
+        # auth token service here
     else:
         # Verification failed, or an error occurred
         response["error"] = verification[1]
