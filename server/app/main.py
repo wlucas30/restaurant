@@ -169,9 +169,9 @@ def checkCode():
     }
     
     # Only accept SSL connections as we are returning sensitive information
-    if not request.is_secure:
+    """if not request.is_secure:
         response["error"] = "This service can only be accessed using SSL."
-        return jsonify(response)
+        return jsonify(response)"""
     
     # Attempts to convert POST request parameters from JSON to Python format
     userID, code = None, None
