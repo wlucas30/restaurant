@@ -3,16 +3,21 @@ from email_validator import validate_email, EmailNotValidError
 
 # This class is used for organising data about users of the system
 class User:
-    def __init__(self, email, name=None):
-        # Check if the provided email is valid and deliverable, otherwise return an error
-        try:
-            email_info = validate_email(email, check_deliverability=True)
-            self.email = email_info.email.lower()
-        except EmailNotValidError as e:
-            # The provided email is invalid, this returns a detailed explanation why
-            self.error = str(e)
-            return
-        
+    def __init__(self, email=None, name=None, userID=None):
+        if email is not None:
+            # Check if the provided email is valid and deliverable, otherwise return an error
+            try:
+                email_info = validate_email(email, check_deliverability=True)
+                self.email = email_info.email.lower()
+                self.userID = None
+            except EmailNotValidError as e:
+                # The provided email is invalid, this returns a detailed explanation why
+                self.error = str(e)
+                return
+        else:
+            self.userID = userID
+            self.email = None
+            
         self.name = name
         
         # Establish whether an account with the provided email already exists
@@ -23,10 +28,10 @@ class User:
             with connection[0] as connection:
                 with connection.cursor() as cursor:
                     # Check if a user with the provided email exists already
-                    userDetails = self.getUserDetails(cursor, self.email)
+                    userDetails = self.getUserDetails(cursor, self.email, self.userID)
                     if userDetails is not None:
                         # User already exists, store their details from the SQL query result
-                        self.userID, self.name, self.professional, self.loginAttempts, self.verified = tuple([userDetails[i] for i in range(5)])
+                        self.email, self.userID, self.name, self.professional, self.loginAttempts, self.verified = tuple([userDetails[i] for i in range(6)])
                     else:
                         # No user exists, create a new unverified non-professional user
                         if not self.createUser(connection, cursor, self.name, self.email):
@@ -37,14 +42,20 @@ class User:
             self.error = connection[1]
             return
     
-    def getUserDetails(self, cursor, email):
+    def getUserDetails(self, cursor, email=None, userID=None):
         # Prepare SQL to be executed
-        sql = "SELECT userID, name, professional, loginAttempts, verified FROM User WHERE email = %s;"
-        
-        # Execute the SQL command
-        cursor.execute(sql, (email,))
+        if email is not None:
+            sql = "SELECT email, userID, name, professional, loginAttempts, verified FROM User WHERE email = %s;"
+            
+            # Execute the SQL command
+            cursor.execute(sql, (email,))
+        else:
+            sql = "SELECT email, userID, name, professional, loginAttempts, verified FROM User WHERE userID = %s;"
+            
+            # Execute the SQL command
+            cursor.execute(sql, (userID,))
+            
         result = cursor.fetchone() # None if there are no users
-        
         return result
     
     def createUser(self, connection, cursor, name, email):

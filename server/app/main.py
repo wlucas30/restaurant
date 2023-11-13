@@ -212,6 +212,10 @@ def checkCode():
     
     return jsonify(response)
 
+@app.route("/accountDetails", methods=["POST"])
+def accountDetails():
+    return
+
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)
