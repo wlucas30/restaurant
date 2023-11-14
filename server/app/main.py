@@ -4,6 +4,7 @@ from services.restaurant_details import getRestaurantDetails
 from services.email_verification import beginVerification
 from services.check_verification import checkVerificationCode
 from services.auth_token import getAuthToken
+from services.authenticate import authenticate
 from models.user import User
 
 # This sets the app name
@@ -214,7 +215,54 @@ def checkCode():
 
 @app.route("/accountDetails", methods=["POST"])
 def accountDetails():
-    return
+    """
+    This function takes a userID and authentication token. If authentication succeeds,
+    the details for the provided userID will be returned.
+    """
+    
+    # Prepares response to be returned to the client
+    response = {
+        "details": None,
+        "error": None
+    }
+    
+    userID, auth = None, None
+    try:
+        data = request.json
+        userID, auth = data["userID"], data["authToken"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    authentication = authenticate(userID, auth)
+    
+    if authentication[0]:
+        # Authentication has succeeded, obtain user details from userID
+        temp_user = User(userID=userID)
+        
+        # Store user details in a record
+        response["details"] = {
+            "name": temp_user.name,
+            "email": temp_user.email,
+            "professional": bool(temp_user.professional),
+            "verified": bool(temp_user.verified)
+        }
+        
+        # Respond to the request
+        return jsonify(response)
+    else:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)
 
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
