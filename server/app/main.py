@@ -6,6 +6,7 @@ from services.check_verification import checkVerificationCode
 from services.auth_token import getAuthToken
 from services.authenticate import authenticate
 from services.make_review import makeReview
+from services.get_reviews import getReviews
 from models.user import User
 
 # This sets the app name
@@ -304,6 +305,45 @@ def makeRestaurantReview():
         response["error"] = review[1]
     else:
         response["success"] = True
+    
+    return jsonify(response)
+
+@app.route("/getReviews", methods=["POST"])
+def getRestaurantReviews():
+    """
+    This function allows users to make reviews for restaurants.
+    """
+    
+    # Prepares response to be returned to the client
+    response = {
+        "reviews": None,
+        "error": None
+    }
+    
+    restaurantID = None
+    try:
+        data = request.json
+        restaurantID = data["restaurantID"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    reviews = getReviews(restaurantID)
+    
+    if reviews[0] is None:
+        # Error occurred
+        response["error"] = reviews[1]
+    else:
+        response["reviews"] = reviews[0]
     
     return jsonify(response)
 
