@@ -4,6 +4,8 @@ from email_validator import validate_email, EmailNotValidError
 # This class is used for organising data about users of the system
 class User:
     def __init__(self, email=None, name=None, userID=None):
+        self.error = None
+        
         if email is not None:
             # Check if the provided email is valid and deliverable, otherwise return an error
             try:
@@ -22,7 +24,7 @@ class User:
         
         # Establish whether an account with the provided email already exists
         connection = connect()
-        self.error = None
+        
         
         if connection[0] is not None:
             with connection[0] as connection:
@@ -79,3 +81,25 @@ class User:
             # Store an error message and halt execution
             self.error = "An error occurred when creating a new account: Missing parameter \"name\""
             return False
+
+# This class inherits from the User class
+class ProfessionalUser(User):
+    def __init__(self, userID):
+        super().__init__(userID=userID)
+        
+        if self.error is not None:
+            return
+        
+        # Promote to professional if necessary
+        if not bool(self.professional):
+            self.promoteToProfessional()
+            if self.error is not None:
+                return
+        
+    def getRestaurant():
+        return
+    
+    def promoteToProfessional():
+        # Change user professional attribute to 1
+        # Create blank restaurant ({name}'s restaurant)
+        return

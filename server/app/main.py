@@ -5,6 +5,7 @@ from services.email_verification import beginVerification
 from services.check_verification import checkVerificationCode
 from services.auth_token import getAuthToken
 from services.authenticate import authenticate
+from services.make_review import makeReview
 from models.user import User
 
 # This sets the app name
@@ -263,6 +264,48 @@ def accountDetails():
         # Authentication failed
         response["error"] = authentication[1]
         return jsonify(response)
+
+@app.route("/makeReview", methods=["POST"])
+def makeRestaurantReview():
+    """
+    This function allows users to make reviews for restaurants.
+    """
+    
+    # Prepares response to be returned to the client
+    response = {
+        "success": None,
+        "error": None
+    }
+    
+    userID, token, restaurantID, rating, title, body = None, None, None, None, None, None
+    try:
+        data = request.json
+        userID, token = data["userID"], data["authToken"]
+        restaurantID = data["restaurantID"]
+        rating, title, body = data["rating"], data["title"], data["body"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    review = makeReview(userID, token, restaurantID, rating, title, body)
+    
+    if not review[0]:
+        # Error occurred
+        response["success"] = False
+        response["error"] = review[1]
+    else:
+        response["success"] = True
+    
+    return jsonify(response)
 
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
