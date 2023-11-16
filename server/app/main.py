@@ -116,7 +116,7 @@ def checkAccount():
     
     # Prepares response to be returned to the client
     response = {
-        "success" : False,
+        "userID" : None,
         "error" : None
     }
     
@@ -153,7 +153,7 @@ def checkAccount():
         response["error"] = verification[1]
         return jsonify(response)
     else:
-        response["success"] = True
+        response["userID"] = account.userID
         return jsonify(response)
     
 @app.route("/getAuthToken", methods=["POST"])
