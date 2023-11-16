@@ -1,5 +1,6 @@
 from services.db_connection import connect
 from email_validator import validate_email, EmailNotValidError
+from services.authenticate import authenticate
 
 # This class is used for organising data about users of the system
 class User:
@@ -24,8 +25,6 @@ class User:
         
         # Establish whether an account with the provided email already exists
         connection = connect()
-        
-        
         if connection[0] is not None:
             with connection[0] as connection:
                 with connection.cursor() as cursor:
@@ -81,6 +80,40 @@ class User:
             # Store an error message and halt execution
             self.error = "An error occurred when creating a new account: Missing parameter \"name\""
             return False
+    
+    def changeEmail(self, new_email, auth_token):
+        # Check that the provided authentication token is valid
+        authentication = authenticate(self.userID, auth_token)
+        
+        if not authentication[0]:
+            self.error = authentication[1]
+            return
+        
+        connection = connect()
+        if connection[0] is not None:
+            with connection[0] as connection:
+                with connection.cursor() as cursor:
+                    # Change the stored email in the database
+                    sql = "UPDATE User SET email = %s, verified=0 WHERE userID = %s;"
+                    # Delete any stored authentication tokens or verification codes
+                    sql2 = "DELETE FROM AuthenticationToken WHERE userID = %s";
+                    sql3 = "DELETE FROM VerificationCode WHERE userID = %s;"
+                    try:
+                        cursor.execute(sql, (new_email, self.userID))
+                        cursor.execute(sql2, (self.userID,))
+                        cursor.execute(sql3, (self.userID,))
+                        connection.commit()
+                    except Exception as e:
+                        self.error = f"Error occurred during database operation: {e}"
+                        connection.rollback() # revert changes
+                        return
+                    
+                    self.email = new_email
+                    return
+        else:
+            # An error has occurred, store it and halt execution
+            self.error = connection[1]
+            return
 
 # This class inherits from the User class
 class ProfessionalUser(User):
