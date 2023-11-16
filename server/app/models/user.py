@@ -8,14 +8,8 @@ class User:
         self.error = None
         
         if email is not None:
-            # Check if the provided email is valid and deliverable, otherwise return an error
-            try:
-                email_info = validate_email(email, check_deliverability=True)
-                self.email = email_info.email.lower()
-                self.userID = None
-            except EmailNotValidError as e:
-                # The provided email is invalid, this returns a detailed explanation why
-                self.error = str(e)
+            self.userID = None
+            if not self.validateEmail(email):
                 return
         else:
             self.userID = userID
@@ -82,7 +76,12 @@ class User:
             return False
     
     def changeEmail(self, new_email, auth_token):
+        # Validate the provided email
+        if not self.validateEmail(new_email):
+            return
+        
         # Check that the provided authentication token is valid
+        print(self.userID)
         authentication = authenticate(self.userID, auth_token)
         
         if not authentication[0]:
@@ -96,10 +95,10 @@ class User:
                     # Change the stored email in the database
                     sql = "UPDATE User SET email = %s, verified=0 WHERE userID = %s;"
                     # Delete any stored authentication tokens or verification codes
-                    sql2 = "DELETE FROM AuthenticationToken WHERE userID = %s";
+                    sql2 = "DELETE FROM AuthToken WHERE userID = %s";
                     sql3 = "DELETE FROM VerificationCode WHERE userID = %s;"
                     try:
-                        cursor.execute(sql, (new_email, self.userID))
+                        cursor.execute(sql, (self.email, self.userID))
                         cursor.execute(sql2, (self.userID,))
                         cursor.execute(sql3, (self.userID,))
                         connection.commit()
@@ -114,6 +113,17 @@ class User:
             # An error has occurred, store it and halt execution
             self.error = connection[1]
             return
+    
+    def validateEmail(self, email):
+        # Check if the provided email is valid and deliverable, otherwise return an error
+        try:
+            email_info = validate_email(email, check_deliverability=True)
+            self.email = email_info.email.lower()
+            return True
+        except EmailNotValidError as e:
+            # The provided email is invalid, this returns a detailed explanation why
+            self.error = str(e)
+            return False
 
 # This class inherits from the User class
 class ProfessionalUser(User):

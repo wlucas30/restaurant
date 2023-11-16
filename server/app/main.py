@@ -347,6 +347,56 @@ def getRestaurantReviews():
     
     return jsonify(response)
 
+@app.route("/changeEmail", methods=["POST"])
+def changeUserEmail():
+    """
+    This function allows users to change the email address associated with
+    their account.
+    """
+    
+    # Prepares response to be returned to the client
+    response = {
+        "success": None,
+        "error": None
+    }
+    
+    userID, auth_token, new_email = None, None, None
+    try:
+        data = request.json
+        userID, auth_token = data["userID"], data["authToken"]
+        new_email = data["newEmail"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    temp_user = User(userID=userID)
+    if temp_user.error != None:
+        # An error has occured
+        response["success"] = False
+        response["error"] = temp_user.error
+    else:
+        # Attempt to change email
+        print(new_email, auth_token)
+        temp_user.changeEmail(new_email, auth_token)
+        
+        # Check for errors
+        if temp_user.error != None:
+            response["success"] = False
+            response["error"] = temp_user.error
+        else:
+            response["success"] = True
+    
+    return jsonify(response)
+
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)
