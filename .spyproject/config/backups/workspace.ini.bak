@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['server/app/main.py', 'server/app/services/restaurant_search.py', 'server/app/models/user.py', 'server/app/services/get_reviews.py', 'server/app/services/make_review.py', 'server/app/services/authenticate.py', 'server/app/services/nearby_restaurants.py', 'server/app/test.py']
+recent_files = ['server/app/main.py']
 
 [main]
 version = 0.2.0

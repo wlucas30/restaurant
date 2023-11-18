@@ -58,25 +58,23 @@ def mergeRestaurants(left, right):
     # Two pointers for iterating through each half
     leftPointer, rightPointer = 0, 0
     
-    # Only return 10 results at maximum
-    while (leftPointer + rightPointer < 10) and (leftPointer < len(left) or rightPointer < len(right)):
-        while leftPointer < len(left) and rightPointer < len(right):
-            # Compare the distance from both halves
-            if left[leftPointer][1] <= right[rightPointer][1]:
-                sortedRestaurants.append(left[leftPointer])
-                leftPointer += 1
-            else:
-                sortedRestaurants.append(right[rightPointer])
-                rightPointer += 1
-        
-        # Add any leftover elements to the sorted array
-        while leftPointer < len(left):
+    while leftPointer < len(left) and rightPointer < len(right) and (leftPointer + rightPointer) < 10:
+        # Compare the distance from both halves
+        if left[leftPointer][1] <= right[rightPointer][1]:
             sortedRestaurants.append(left[leftPointer])
             leftPointer += 1
-        
-        while rightPointer < len(right):
+        else:
             sortedRestaurants.append(right[rightPointer])
             rightPointer += 1
+        
+    # Add any leftover elements to the sorted array
+    while leftPointer < len(left) and (leftPointer + rightPointer) < 10:
+        sortedRestaurants.append(left[leftPointer])
+        leftPointer += 1
+        
+    while rightPointer < len(right) and (leftPointer + rightPointer) < 10:
+        sortedRestaurants.append(right[rightPointer])
+        rightPointer += 1
 
     return sortedRestaurants
     
