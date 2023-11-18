@@ -12,7 +12,14 @@ def restaurantSearch(search_term):
     # Calculate and store the Levenshtein distance for each restaurant
     for i in range(len(restaurantNames)):
         restaurant = restaurantNames[i]
-        distance = calculateLevenshteinDistance(restaurant[1], search_term)
+        name = restaurant[1]
+        
+        # If the restaurant name is longer than the search term then only compare the
+        # first part of the restaurant name so that the lengths are equal
+        if len(name) > len(search_term):
+            name = name[:len(search_term)]
+            
+        distance = calculateLevenshteinDistance(name, search_term)
         
         # Store the distance in the tuple
         # (restaurantID, name, levenshteinDistance)
@@ -20,7 +27,7 @@ def restaurantSearch(search_term):
         
     # Return the ordered list of restaurants
     return (orderByDistance(restaurantNames), False)
-
+    
 def getRestaurantNames():
     # This function returns every stored restaurant name, matched to a restaurantID
     # Attempt to connect to the database
@@ -48,39 +55,38 @@ def orderByDistance(restaurantNames):
         return restaurantNames # base case
     # Split into two halves recursively
     midpoint = len(restaurantNames) // 2
-    left = restaurantNames[:midpoint]
-    right = restaurantNames[midpoint:]
+    left = orderByDistance(restaurantNames[:midpoint])
+    right = orderByDistance(restaurantNames[midpoint:])
     
     # Merge the halves together into a sorted array
     return mergeRestaurants(left, right)
 
 # This merges two lists of sorted restaurants
 def mergeRestaurants(left, right):
-    print(left, right)
     sortedRestaurants = [] # prepare empty array for sorting
     leftPointer, rightPointer, numSorted = 0, 0, 0
     
     # Continously add the smallest distance restaurant from each half
     while leftPointer < len(left) and rightPointer < len(right) and numSorted < 10:
         if left[leftPointer][2] < right[rightPointer][2]:
-            sortedRestaurants.append(left[leftPointer][:2])
+            sortedRestaurants.append(left[leftPointer])
             leftPointer += 1
             numSorted += 1
         else:
-            sortedRestaurants.append(right[rightPointer][:2])
+            sortedRestaurants.append(right[rightPointer])
             rightPointer += 1
             numSorted += 1
     
     # Add any remaining restaurants
     while leftPointer < len(left) and numSorted < 10:
-        sortedRestaurants.append(left[leftPointer][:2])
+        sortedRestaurants.append(left[leftPointer])
         leftPointer += 1
         numSorted += 1
     while rightPointer < len(right) and numSorted < 10:
-        sortedRestaurants.append(right[rightPointer][:2])
+        sortedRestaurants.append(right[rightPointer])
         rightPointer += 1
         numSorted += 1
-    
+
     return sortedRestaurants
 
 def calculateLevenshteinDistance(term1, term2):

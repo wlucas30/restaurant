@@ -7,6 +7,7 @@ from services.auth_token import getAuthToken
 from services.authenticate import authenticate
 from services.make_review import makeReview
 from services.get_reviews import getReviews
+from services.restaurant_search import restaurantSearch
 from models.user import User
 
 # This sets the app name
@@ -394,6 +395,55 @@ def changeUserEmail():
             response["error"] = temp_user.error
         else:
             response["success"] = True
+    
+    return jsonify(response)
+
+@app.route("/restaurantSearch", methods=["POST"])
+def searchForRestaurants():
+    """
+    This function allows users to provide a search term and returns a list of
+    relevant restaurants (limited to 10 at most)
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "results": None,
+        "error": None
+    }
+    
+    search_term = None
+    try:
+        data = request.json
+        search_term = data["searchTerm"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    # Attempt to get relevant restaurants
+    results = restaurantSearch(search_term)
+    
+    if results[0] is None:
+        # An error has occurred
+        response["error"] = results[1]
+    else:
+        # Restructure each tuple in the results into a dictionary
+        results = results[0]
+        for i in range(len(results)):
+            restaurant = results[i]
+            results[i] = {
+                "restaurantID": restaurant[0],
+                "name": restaurant[1]
+            }
+        
+        response["results"] = results
     
     return jsonify(response)
 
