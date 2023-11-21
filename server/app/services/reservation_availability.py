@@ -1,10 +1,14 @@
 from services.db_connection import connect
-import datetime
+import datetime as dt
 
 # This function returns a list of all available reservation start times
 def getAvailableReservations(restaurantID, date, persons):
     # Attempt to connect to the database
     connection = connect()
+    
+    # Check that the date is in the future
+    if date < dt.datetime.combine(dt.datetime.now(), dt.datetime.min.time()):
+        return (None, "The provided date is in the past")
     
     if connection[0] is not None:
         with connection[0] as connection:
@@ -18,11 +22,11 @@ def getAvailableReservations(restaurantID, date, persons):
                     currentTime, closingTime = period
                     
                     # Check each 30 minute period up to 2 hours before closing
-                    closingTime -= datetime.timedelta(hours=2)
-                    
-                    while currentTime <= closingTime and currentTime > datetime.datetime.now():
+                    closingTime -= dt.timedelta(hours=2)
+
+                    while currentTime <= closingTime:
                         # Check availability at this time
-                        currentDatetime = datetime.datetime.combine(date, datetime.time(0,0)) + currentTime
+                        currentDatetime = dt.datetime.combine(date, dt.time(0,0)) + currentTime
                         sql = """
                         SELECT tableID FROM RestaurantTable
                         WHERE restaurantID = %s
@@ -40,12 +44,16 @@ def getAvailableReservations(restaurantID, date, persons):
                         if len(result) > 0:
                             # This means there is availability in the selected period
                             # Convert the start time to string format and add it
-                            currentTimeStr = (datetime.datetime.min + currentTime).strftime("%H:%M")
+                            currentTimeStr = (dt.datetime.min + currentTime).strftime("%H:%M")
                             
                             availableStartTimes.append(currentTimeStr)
                         
                         # Add 30 minutes and check next time slot
-                        currentTime += datetime.timedelta(minutes=30)
+                        currentTime += dt.timedelta(minutes=30)
+                
+                # Remove any times which are in the past if the reservation is for today
+                if date == dt.datetime.combine(dt.datetime.now(), dt.datetime.min.time()):
+                    availableStartTimes = removePastTimes(availableStartTimes)
                 
                 return (availableStartTimes, None)
     else:
@@ -73,3 +81,19 @@ def getOpeningPeriods(cursor, restaurantID, date):
         openingPeriods.append((period[0], period[1]))
     
     return openingPeriods
+
+def removePastTimes(times):
+    # times is an array of times in the format "HH:MM"
+    filtered_times = []
+    
+    # Get the current time
+    current_time = dt.datetime.now().time()
+    
+    for given_time in times:
+        # Convert the time string to a datetime object
+        timeObject = dt.datetime.strptime(given_time, "%H:%M").time()
+        if timeObject > current_time:
+            # The time is in the future so can be returned
+            filtered_times.append(given_time)
+            
+    return filtered_times

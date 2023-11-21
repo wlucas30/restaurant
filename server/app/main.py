@@ -8,6 +8,8 @@ from services.authenticate import authenticate
 from services.make_review import makeReview
 from services.get_reviews import getReviews
 from services.restaurant_search import restaurantSearch
+from services.reservation_availability import getAvailableReservations
+from datetime import datetime
 from models.user import User
 
 # This sets the app name
@@ -445,6 +447,57 @@ def searchForRestaurants():
         
         response["results"] = results
     
+    return jsonify(response)
+
+@app.route("/reservationAvailability", methods=["POST"])
+def getRestaurantAvailability():
+    """
+    This function allows users to get the available start times for reservations
+    at a given restaurant on a given date for a specific number of people
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "results": None,
+        "error": None
+    }
+    
+    restaurantID, date, persons = None, None, None
+    try:
+        data = request.json
+        restaurantID = data["restaurantID"]
+        date, persons = data["date"], data["persons"]
+        # The date should be a string in format "YYYY-MM-DD" to comply with ISO 8601 
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    # Attempt to convert the date from string to datetime object
+    dateObject = None
+    try:
+        dateObject = datetime.strptime(date, "%Y-%m-%d")
+    except ValueError as e:
+        # A ValueError could be raised if the date is incorrectly formatted
+        response["error"] = str(e)
+        return jsonify(response)
+    
+    # Retrieve avaialble reservation start times
+    availableReservations = getAvailableReservations(restaurantID, dateObject, persons)
+    
+    # Check for errors
+    if availableReservations[0] is None:
+        response["error"] = availableReservations[1]
+        return jsonify(response)
+    
+    response["results"] = availableReservations[0]
     return jsonify(response)
 
 # This runs the app so that POST requests can be received
