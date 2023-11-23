@@ -9,8 +9,9 @@ from services.make_review import makeReview
 from services.get_reviews import getReviews
 from services.restaurant_search import restaurantSearch
 from services.reservation_availability import getAvailableReservations
+from services.make_reservation import makeReservation
 from datetime import datetime
-from models.user import User
+from models.user import User, ProfessionalUser
 
 # This sets the app name
 app = Flask("tableNest")
@@ -498,6 +499,91 @@ def getRestaurantAvailability():
         return jsonify(response)
     
     response["results"] = availableReservations[0]
+    return jsonify(response)
+
+@app.route("/makeReservation", methods=["POST"])
+def placeReservation():
+    """
+    This function allows users to place reservations at a restaurant, and checks
+    that the provided timeslot is available
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "success": False,
+        "error": None
+    }
+    
+    userID, authToken, restaurantID, date, time, persons = None, None, None, None, None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+        restaurantID = data["restaurantID"]
+        date, time, persons = data["date"], data["time"], data["persons"]
+        # The date should be a string in format "YYYY-MM-DD" to comply with ISO 8601 
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    # Attempt to place reservation
+    reservation = makeReservation(userID, authToken, restaurantID, date, time, persons)
+    
+    if not reservation[0]:
+        # Reservation failed
+        response["error"] = reservation[1]
+    else:
+        response["success"] = True
+        
+    return jsonify(response)
+
+@app.route("/createRestaurant", methods=["POST"])
+def createRestaurant():
+    """
+    This function allows users to be promoted to professional and create a 
+    new blank restaurant
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "success": False,
+        "error": None
+    }
+    userID, authToken = None, None
+    
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    # Check that the provided authentication token is valid
+    authentication = authenticate(userID, authToken)
+    
+    if not authentication[0]:
+        response["error"] = authentication[1]
+        return jsonify(response)
+    
+    # Authentication succeeded, promote the user
+    _ = ProfessionalUser(userID=userID)
+    
+    response["success"] = True
     return jsonify(response)
 
 # This runs the app so that POST requests can be received

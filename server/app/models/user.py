@@ -128,21 +128,67 @@ class User:
 # This class inherits from the User class
 class ProfessionalUser(User):
     def __init__(self, userID):
+        # Initialise a User object with the given userID
         super().__init__(userID=userID)
         
         if self.error is not None:
+            # An error has occurred and is stored in self.error, halt execution
             return
         
-        # Promote to professional if necessary
-        if not bool(self.professional):
-            self.promoteToProfessional()
-            if self.error is not None:
-                return
-        
-    def getRestaurant():
-        return
+        # Attempt to connect to the database
+        connection = connect()
+        if connection[0] is not None:
+            with connection[0] as connection:
+                with connection.cursor() as cursor:
+                    # Check if the user is a professional, if not then promote them
+                    if not bool(self.professional):
+                        # Change the user to a professional
+                        self.promoteToProfessional(connection, cursor)
+                        # Check for errors
+                        if self.error is not None:
+                            return
+                        
+                        # Create a new blank restaurant
+                        self.createRestaurant(connection, cursor)
+                        return
+                    
+                    # Retrieve the restaurantID of this ProfessionalUser's restaurant
+                    self.restaurantID = self.getRestaurantID(cursor)
+        else:
+            # An error has occurred, store it and halt execution
+            self.error = connection[1]
+            return
     
-    def promoteToProfessional():
+    def promoteToProfessional(self, connection, cursor):
         # Change user professional attribute to 1
-        # Create blank restaurant ({name}'s restaurant)
-        return
+        sql = "UPDATE User SET professional = 1 WHERE userID = %s;"
+        try:
+            cursor.execute(sql, (self.userID,))
+            connection.commit()
+            self.professional = 1
+        except Exception as e:
+            # An error occurred updating the User
+            self.error = str(e)
+            connection.rollback()
+            return
+    
+    def createRestaurant(self, connection, cursor):
+        # Create a new blank restaurant managed by this ProfessionalUser
+        sql = """
+        INSERT INTO Restaurant (managerUserID, name, description, category, location)
+        VALUES (%s, "New Restaurant", "No details yet...", "None", "0, 0");
+        """
+        try:
+            cursor.execute(sql, (self.userID,))
+            connection.commit()
+        except Exception as e:
+            # An error has occurred creating a restaurant
+            self.error = str(e)
+            connection.rollback()
+            return
+        
+    def getRestaurantID(self, cursor):
+        # Retrieve the restaurantID stored for this user's restaurant
+        sql = "SELECT restaurantID FROM Restaurant WHERE managerUserID = %s;"
+        cursor.execute(sql, (self.userID,))
+        return cursor.fetchone()[0]
