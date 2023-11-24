@@ -10,6 +10,7 @@ from services.get_reviews import getReviews
 from services.restaurant_search import restaurantSearch
 from services.reservation_availability import getAvailableReservations
 from services.make_reservation import makeReservation
+from services.update_restaurant import updateRestaurant
 from datetime import datetime
 from models.user import User, ProfessionalUser
 
@@ -584,6 +585,41 @@ def createRestaurant():
     _ = ProfessionalUser(userID=userID)
     
     response["success"] = True
+    return jsonify(response)
+
+@app.route("/updateRestaurant", methods=["POST"])
+def changeRestaurantDetails():
+    """
+    This function allows users to change the details of restaurants which they manage
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "success": False,
+        "error": None
+    }
+    userID, authToken, restaurantName, description, category, location = None, None, None, None, None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+        restaurantName, description, category = data["restaurantName"], data["description"], data["category"]
+        location = data["location"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+        
+        # Stop execution here and return the error message
+        return jsonify(response)
+    
+    restaurantUpdate = updateRestaurant(userID, authToken, restaurantName, description, category, location)
+    response["success"] = restaurantUpdate[0]
+    response["error"] = restaurantUpdate[1]
+    
     return jsonify(response)
 
 # This runs the app so that POST requests can be received
