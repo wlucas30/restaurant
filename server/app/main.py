@@ -11,8 +11,10 @@ from services.restaurant_search import restaurantSearch
 from services.reservation_availability import getAvailableReservations
 from services.make_reservation import makeReservation
 from services.update_restaurant import updateRestaurant
+from services.save_image import saveRestaurantImage
 from datetime import datetime
 from models.user import User, ProfessionalUser
+import json
 
 # This sets the app name
 app = Flask("tableNest")
@@ -619,6 +621,41 @@ def changeRestaurantDetails():
     restaurantUpdate = updateRestaurant(userID, authToken, restaurantName, description, category, location)
     response["success"] = restaurantUpdate[0]
     response["error"] = restaurantUpdate[1]
+    
+    return jsonify(response)
+
+@app.route("/uploadRestaurantImage", methods=["POST"])
+def uploadRestaurantImage():
+    """
+    This function allows an image to be uploaded to the user's restaurant
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "success": False,
+        "error": None
+    }
+    
+    userID, authToken, image = None, None, None
+    try:
+        data = json.loads(request.form.to_dict()["data"])
+        image = request.files["image"]
+        userID = data["userID"]
+        authToken = data["authToken"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        # An error could occur if the request is malformed
+        response["error"] = "An unknown exception occured:", str(e)
+    
+    # Attempt to save the image to the filesystem
+    saved = saveRestaurantImage(userID, authToken, image)
+    
+    response["success"] = saved[0]
+    response["error"] = saved[1]
     
     return jsonify(response)
 
