@@ -12,9 +12,10 @@ from services.reservation_availability import getAvailableReservations
 from services.make_reservation import makeReservation
 from services.update_restaurant import updateRestaurant
 from services.save_image import saveRestaurantImage
+from services.get_image import getRestaurantImages
+from services.delete_image import deleteRestaurantImage
 from datetime import datetime
 from models.user import User, ProfessionalUser
-from services.get_image import getRestaurantImages
 import json
 
 # This sets the app name
@@ -690,6 +691,40 @@ def retrieveRestaurantImages():
 
     # Insert the image dictionary to the response
     response["images"] = images
+
+    return jsonify(response)
+
+@app.route("/deleteRestaurantImage", methods=["POST"])
+def removeRestaurantImage():
+    """
+    This function allows images for a given restaurant to be deleted
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "success": False,
+        "error": None
+    }
+
+    userID, authToken, imageName = None, None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+        imageName = data["imageName"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        response["error"] = "An unknown exception occured:", str(e)
+        return jsonify(response)
+
+    # Attempt to delete the image
+    deleted = deleteRestaurantImage(userID, authToken, imageName)
+
+    response["success"] = deleted[0]
+    response["error"] = deleted[1]
 
     return jsonify(response)
 
