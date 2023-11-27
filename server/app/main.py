@@ -14,6 +14,7 @@ from services.update_restaurant import updateRestaurant
 from services.save_image import saveRestaurantImage
 from datetime import datetime
 from models.user import User, ProfessionalUser
+from services.get_image import getRestaurantImages
 import json
 
 # This sets the app name
@@ -657,6 +658,39 @@ def uploadRestaurantImage():
     response["success"] = saved[0]
     response["error"] = saved[1]
     
+    return jsonify(response)
+
+@app.route("/getRestaurantImages", methods=["POST"])
+def retrieveRestaurantImages():
+    """
+    This function allows images for a given restaurant to be retrieved
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "images": None,
+        "error": None
+    }
+
+    restaurantID = None
+    try:
+        data = request.json
+        restaurantID = data["restaurantID"]
+    except KeyError:
+        response["error"] = "Missing required parameter"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        response["error"] = "An unknown exception occured:", str(e)
+        return jsonify(response)
+
+    # Retrieve the images
+    images = getRestaurantImages(restaurantID)
+
+    # Insert the image dictionary to the response
+    response["images"] = images
+
     return jsonify(response)
 
 # This runs the app so that POST requests can be received
