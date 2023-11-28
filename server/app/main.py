@@ -14,7 +14,7 @@ from services.update_restaurant import updateRestaurant
 from services.save_image import saveRestaurantImage
 from services.get_image import getRestaurantImages
 from services.delete_image import deleteRestaurantImage
-from services.menu_item import addMenuItem, deleteMenuItem
+from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem
 from datetime import datetime
 from models.user import User, ProfessionalUser
 import json
@@ -741,11 +741,13 @@ def addRestaurantMenuItem():
     }
 
     userID, authToken, menuSection, name, description, calories, price = None, None, None, None, None, None, None
+    changeExistingID = None
     try:
         data = request.json
         userID, authToken = data["userID"], data["authToken"]
         menuSection, name, description = data["menuSection"], data["name"], data["description"]
         calories, price = data["calories"], data["price"]
+        changeExistingID = data["changeExistingID"]
     except KeyError:
         response["error"] = "Missing required parameters"
         return jsonify(response)
@@ -775,7 +777,11 @@ def addRestaurantMenuItem():
     restaurantID = user.restaurantID
 
     # Add the menu item
-    added = addMenuItem(restaurantID, menuSection, name, description, calories, price)
+    added = None
+    if changeExistingID is None:
+        added = addMenuItem(restaurantID, menuSection, name, description, calories, price)
+    else:
+        added = changeMenuItem(restaurantID, menuSection, name, description, calories, price, changeExistingID)
 
     # Check for errors and store if necessary
     response["success"], response["error"] = added

@@ -31,6 +31,38 @@ def addMenuItem(restaurantID, menuSection, name, description, calories, price):
     # The menu item has been inserted successfully
     return (True, None)
 
+# This function allows existing MenuItems to be updated
+def changeMenuItem(restaurantID, menuSection, name, description, calories, price, menuItemID):
+    # Perform data validation
+    validation = validate(menuSection, name, description, calories, price)
+    if not validation[0]:
+        # Validation failed, return the error message
+        return (False, validation[1])
+
+    # Attempt to connect to the database
+    connection = connect()
+    if connection[0] is not None:
+        with connection[0] as connection:
+            with connection.cursor() as cursor:
+                # Update the menu item in the database
+                sql = """
+                UPDATE MenuItem
+                SET section = %s, name = %s, description = %s, calories = %s, price = %s
+                WHERE menuItemID = %s AND restaurantID = %s;
+                """
+                try:
+                    cursor.execute(sql, (menuSection, name, description, calories, price, menuItemID, restaurantID))
+                    connection.commit()
+                except Exception as e:
+                    # An error occurred updating the menu item
+                    return (False, f"An error occurred updating the menu item: {e}")
+    else:
+        # An error occurred connecting to the database
+        return (False, connection[1])
+
+    # The menu item has been updated succesfully
+    return (True, None)
+
 def validate(menuSection, name, description, calories, price):
     # Check that the menuSection is a string
     if type(menuSection) is not str:
