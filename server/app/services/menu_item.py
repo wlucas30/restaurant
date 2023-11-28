@@ -63,3 +63,28 @@ def validate(menuSection, name, description, calories, price):
 
     # All validation passed, return no error message
     return (True, None)
+
+def deleteMenuItem(menuItemID, restaurantID):
+    # Attempt to connect to the database
+    connection = connect()
+    if connection[0] is not None:
+        with connection[0] as connection:
+            with connection.cursor() as cursor:
+                # Delete the menu item from the database
+                sql = "DELETE FROM MenuItem WHERE menuItemID = %s AND restaurantID = %s;"
+                # We also need to delete any OrderItems to maintain referential integrity
+                sql2 = "DELETE FROM OrderItem WHERE menuItemID = %s;"
+                try:
+                    cursor.execute(sql, (menuItemID, restaurantID))
+                    cursor.execute(sql2, (menuItemID,))
+                    connection.commit()
+                except Exception as e:
+                    # An error occurred deleting the menu item or order items
+                    connection.rollback()
+                    return (False, f"An error occurred during deletion: {e}")
+    else:
+        # An error occurred connecting to the database
+        return (False, connection[1])
+
+    # The menu item has been deleted successfully
+    return (True, None)
