@@ -120,3 +120,46 @@ def deleteMenuItem(menuItemID, restaurantID):
 
     # The menu item has been deleted successfully
     return (True, None)
+
+from services.save_image import validateImage
+def saveMenuItemImage(image, menuItemID, restaurantID):
+    # This constant specifies the directory where images are stored
+    imageStore = "/Users/wl/Documents/restaurant/server/static/menu_item_images"
+
+    # Perform data validation
+    validation = validateImage(image)
+    if not validation[0]:
+        # Validation failed, return the error message
+        return (False, validation[1])
+
+    # Attempt to connect to the database
+    connection = connect()
+    if connection[0] is not None:
+        with connection[0] as connection:
+            with connection.cursor() as cursor:
+                # Check that the menu item exists
+                sql = "SELECT * FROM MenuItem WHERE menuItemID = %s AND restaurantID = %s;"
+                cursor.execute(sql, (menuItemID, restaurantID))
+                result = cursor.fetchall()
+                if len(result) == 0:
+                    # The menu item does not exist, return an error
+                    return (False, "The specified menu item does not exist")
+
+                # The menu item exists, now save the image
+                image = validation[0]
+
+                # The image name should be the same as the menuItemID
+                filename = str(menuItemID) + ".jpg"
+
+                # Try to save the image, replacing any existing files with the same name
+                try:
+                    image.save(imageStore+"/"+filename, format="JPEG")
+                except Exception as e:
+                    # An error occurred saving the image
+                    return (False, f"An error occurred saving the image: {e}")
+    else:
+        # An error occurred connecting to the database
+        return (False, connection[1])
+
+    # Return success message
+    return (True, None)

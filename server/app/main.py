@@ -14,7 +14,7 @@ from services.update_restaurant import updateRestaurant
 from services.save_image import saveRestaurantImage
 from services.get_image import getRestaurantImages
 from services.delete_image import deleteRestaurantImage
-from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem
+from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem, saveMenuItemImage
 from datetime import datetime
 from models.user import User, ProfessionalUser
 import json
@@ -837,6 +837,57 @@ def deleteRestaurantMenuItem():
 
     # Check for errors and store if necessary
     response["success"], response["error"] = deleted
+
+    return jsonify(response)
+
+@app.route("/uploadMenuItemImage", methods=["POST"])
+def uploadMenuItemImage():
+    """
+    This function allows an image to be uploaded for a menu item
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "success": False,
+        "error": None
+    }
+
+    userID, authToken, image, menuItemID = None, None, None, None
+    try:
+        data = json.loads(request.form.to_dict()["data"])
+        image = request.files["image"]
+        userID = data["userID"]
+        authToken = data["authToken"]
+        menuItemID = data["menuItemID"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+
+    # Authenticate the user
+    """authentication = authenticate(userID, authToken)
+    if not authentication[0]:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)"""
+
+    # Authentication succeeded, check whether the user is a professional
+    user = User(userID=userID)
+    if not user.professional:
+        # The user is not a professional, return an error
+        response["error"] = "The specified user is not a professional user"
+        return jsonify(response)
+
+    # The user is a professional, so find their restaurantID
+    user = ProfessionalUser(userID)
+    restaurantID = user.restaurantID
+
+    # Attempt to save the image to the filesystem
+    saved = saveMenuItemImage(image, menuItemID, restaurantID)
+
+    response["success"] = saved[0]
+    response["error"] = saved[1]
 
     return jsonify(response)
 
