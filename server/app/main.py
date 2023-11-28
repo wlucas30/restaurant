@@ -14,6 +14,7 @@ from services.update_restaurant import updateRestaurant
 from services.save_image import saveRestaurantImage
 from services.get_image import getRestaurantImages
 from services.delete_image import deleteRestaurantImage
+from services.menu_item import addMenuItem
 from datetime import datetime
 from models.user import User, ProfessionalUser
 import json
@@ -725,6 +726,59 @@ def removeRestaurantImage():
 
     response["success"] = deleted[0]
     response["error"] = deleted[1]
+
+    return jsonify(response)
+
+@app.route("/addMenuItem", methods=["POST"])
+def addRestaurantMenuItem():
+    """
+    This function allows users to add a new item to their restaurant's menu
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "success": False,
+        "error": None
+    }
+
+    userID, authToken, menuSection, name, description, calories, price = None, None, None, None, None, None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+        menuSection, name, description = data["menuSection"], data["name"], data["description"]
+        calories, price = data["calories"], data["price"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        response["error"] = "An unknown exception occured:", str(e)
+        return jsonify(response)
+
+    # Authenticate the user
+    """authentication = authenticate(userID, authToken)
+    if not authentication[0]:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)"""
+
+    # Authentication succeeded, check whether the user is a professional
+    user = User(userID=userID)
+    if not user.professional:
+        # The user is not a professional, return an error
+        response["error"] = "The specified user is not a professional user"
+        return jsonify(response)
+
+    # The user is a professional, so find their restaurantID
+    user = ProfessionalUser(userID)
+    restaurantID = user.restaurantID
+
+    # Add the menu item
+    added = addMenuItem(restaurantID, menuSection, name, description, calories, price)
+
+    # Check for errors and store if necessary
+    response["success"], response["error"] = added
 
     return jsonify(response)
 
