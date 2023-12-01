@@ -1,4 +1,6 @@
 from services.db_connection import connect
+import os
+import base64
 
 # This function inserts a given menu item to the database
 def addMenuItem(restaurantID, menuSection, name, description, calories, price):
@@ -56,6 +58,9 @@ def changeMenuItem(restaurantID, menuSection, name, description, calories, price
                 except Exception as e:
                     # An error occurred updating the menu item
                     return (False, f"An error occurred updating the menu item: {e}")
+
+                # Delete the stored image for the menu item to prevent inconsistencies
+                deleteMenuItemImage(menuItemID)
     else:
         # An error occurred connecting to the database
         return (False, connection[1])
@@ -114,6 +119,14 @@ def deleteMenuItem(menuItemID, restaurantID):
                     # An error occurred deleting the menu item or order items
                     connection.rollback()
                     return (False, f"An error occurred during deletion: {e}")
+
+                # Delete the stored image for the menu item
+                imageStore = "/Users/wl/Documents/restaurant/server/static/menu_item_images"
+                try:
+                    os.remove(f"{imageStore}/{menuItemID}.jpg")
+                except:
+                    # No image exists for this menu item, but this does not necessitate an error
+                    pass
     else:
         # An error occurred connecting to the database
         return (False, connection[1])
@@ -122,6 +135,16 @@ def deleteMenuItem(menuItemID, restaurantID):
     return (True, None)
 
 from services.save_image import validateImage
+
+def deleteMenuItemImage(menuItemID):
+    # Delete the stored image for the menu item
+    imageStore = "/Users/wl/Documents/restaurant/server/static/menu_item_images"
+    try:
+        os.remove(f"{imageStore}/{menuItemID}.jpg")
+    except:
+        # No image exists for this menu item, but this does not necessitate an error
+        pass
+
 def saveMenuItemImage(image, menuItemID, restaurantID):
     # This constant specifies the directory where images are stored
     imageStore = "/Users/wl/Documents/restaurant/server/static/menu_item_images"
@@ -163,3 +186,49 @@ def saveMenuItemImage(image, menuItemID, restaurantID):
 
     # Return success message
     return (True, None)
+
+def getMenu(restaurantID):
+    # This function allows all menu items and their images to be retrieved for a given restaurant
+    # Attempt to connect to the database
+    connection = connect()
+
+    # This constant stores the location where menu item images are stored
+    imageDirectory = "/Users/wl/Documents/restaurant/server/static/menu_item_images"
+
+    if connection[0] is not None:
+        with connection[0] as connection:
+            with connection.cursor() as cursor:
+                # Retrieve all menu items for the restaurant
+                sql = "SELECT * FROM MenuItem WHERE restaurantID = %s GROUP BY section;"
+                cursor.execute(sql, (restaurantID,))
+                result = cursor.fetchall()
+                menu = []
+                for row in result:
+                    # For each menu item, retrieve the image
+                    menuItemID, section, name = row[0], row[2], row[3]
+                    description, calories, price = row[4], row[5], row[6]
+                    image = None
+                    try:
+                        with open(f"{imageDirectory}/{menuItemID}.jpg", "rb") as imageFile:
+                            # Encode the image bytes in utf-8 to allow it to be stored in JSON
+                            image = base64.b64encode(imageFile.read()).decode("utf-8")
+                    except:
+                        # No image exists for this menu item, but this does not necessitate an error
+                        pass
+
+                    # Append the menu item details and image to the menu
+                    menu.append({
+                        "menuItemID": menuItemID,
+                        "section": section,
+                        "name": name,
+                        "description": description,
+                        "calories": calories,
+                        "price": price,
+                        "image": image
+                    })
+
+                # Return the menu
+                return (menu, None)
+    else:
+        # An error occurred connecting to the database
+        return (None, connection[1])

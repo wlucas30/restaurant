@@ -14,7 +14,7 @@ from services.update_restaurant import updateRestaurant
 from services.save_image import saveRestaurantImage
 from services.get_image import getRestaurantImages
 from services.delete_image import deleteRestaurantImage
-from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem, saveMenuItemImage
+from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem, saveMenuItemImage, getMenu, deleteMenuItemImage
 from datetime import datetime
 from models.user import User, ProfessionalUser
 import json
@@ -888,6 +888,39 @@ def uploadMenuItemImage():
 
     response["success"] = saved[0]
     response["error"] = saved[1]
+
+    return jsonify(response)
+
+@app.route("/getMenu", methods=["POST"])
+def getRestaurantMenu():
+    """
+    This function allows users to retrieve the menu for a given restaurant
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "menu": None,
+        "error": None
+    }
+
+    restaurantID = None
+    try:
+        data = request.json
+        restaurantID = data["restaurantID"]
+    except KeyError:
+        response["error"] = "Missing required parameter"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+    except Exception as e:
+        response["error"] = "An unknown exception occured:", str(e)
+        return jsonify(response)
+
+    # Retrieve the menu
+    menu = getMenu(restaurantID)
+
+    # Insert the menu dictionary to the response
+    response["menu"], response["error"] = menu
 
     return jsonify(response)
 
