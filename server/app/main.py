@@ -15,6 +15,7 @@ from services.save_image import saveRestaurantImage
 from services.get_image import getRestaurantImages
 from services.delete_image import deleteRestaurantImage
 from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem, saveMenuItemImage, getMenu, deleteMenuItemImage
+from services.restaurant import getTables
 from datetime import datetime
 from models.user import User, ProfessionalUser
 from models.table import Table
@@ -975,6 +976,60 @@ def createTable():
         response["error"] = table.error
     else:
         response["success"] = True
+
+    return jsonify(response)
+
+@app.route("/retrieveTables", methods=["POST"])
+def retrieveTable():
+    """
+    This function allows users to retrieve data about all of the tables in their restaurant
+    """
+
+    # Prepare response to be returned to the client
+    response = {
+        "tables": None,
+        "error": None
+    }
+
+    userID, authToken = None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+
+    """# Authenticate the provided token
+    authentication = authenticate(userID, authToken)
+    if not authentication[0]:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)"""
+
+    # Authentication succeeded, check whether the user is a professional
+    user = User(userID=userID)
+    if not user.professional:
+        # The user is not a professional, return an error
+        response["error"] = "The specified user is not a professional user"
+        return jsonify(response)
+
+    # Retrieve the user's restaurantID
+    user = ProfessionalUser(userID)
+    restaurantID = user.restaurantID
+
+    # Retrieve the tables
+    tables = getTables(restaurantID)
+
+    # Check if any errors occurred during table retrieval
+    if tables[0] is None:
+        # An error has occurred
+        response["error"] = tables[1]
+    else:
+        # No errors occurred, return the tables
+        response["tables"] = tables[0]
 
     return jsonify(response)
 
