@@ -58,7 +58,7 @@ class Table:
         if connection[0] is not None:
             with connection[0] as connection:
                 with connection.cursor() as cursor:
-                    sql = "SELECT * FROM Table WHERE restaurantID = %s AND tableID = %s;"
+                    sql = "SELECT * FROM RestaurantTable WHERE restaurantID = %s AND tableID = %s;"
                     cursor.execute(sql, (self.__restaurantID, self.__tableID))
                     result = cursor.fetchall()
                     # Return True if the table exists, False otherwise
@@ -87,6 +87,37 @@ class Table:
             # An error occurred inserting the table
             self.__connection.rollback()
             self.error = f"An error occurred inserting the table: {e}"
+            return False
+
+    def editTable(self, tableNumber, capacity):
+        # This function allows a table's details to be edited
+        # Check that the table number is not already in use
+        sql = "SELECT * FROM RestaurantTable WHERE restaurantID = %s AND tableNumber = %s;"
+        self.__cursor.execute(sql, (self.__restaurantID, tableNumber))
+        result = self.__cursor.fetchall()
+        if len(result) != 0:
+            # A table already exists with the given table number
+            if self.__tableNumber != tableNumber:
+                self.error = "A table already exists with the given table number"
+                # The table number has been changed, so the table number is already in use
+                return False
+
+        # Update the table's details
+        sql = "UPDATE RestaurantTable SET tableNumber = %s, capacity = %s WHERE restaurantID = %s AND tableID = %s;"
+        try:
+            self.__cursor.execute(sql, (tableNumber, capacity, self.__restaurantID, self.__tableID))
+            self.__connection.commit()
+
+            # Update the details stored in the object
+            self.__tableNumber = tableNumber
+            self.__capacity = capacity
+
+            # Return True to indicate success
+            return True
+        except Exception as e:
+            # An error occurred updating the table
+            self.__connection.rollback()
+            self.error = f"An error occurred updating the table: {e}"
             return False
 
     def __del__(self):
