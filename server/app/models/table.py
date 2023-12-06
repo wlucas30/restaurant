@@ -1,4 +1,5 @@
 from services.db_connection import connect
+from services.email import sendEmail
 
 # This class is used for organising data about each table in a restaurant
 class Table:
@@ -112,6 +113,9 @@ class Table:
             self.__tableNumber = tableNumber
             self.__capacity = capacity
 
+            # Delete any future reservations which exceed the table's capacity
+            self.__cancelInvalidReservations()
+
             # Return True to indicate success
             return True
         except Exception as e:
@@ -119,6 +123,38 @@ class Table:
             self.__connection.rollback()
             self.error = f"An error occurred updating the table: {e}"
             return False
+
+    def __cancelInvalidReservations(self):
+        # Retrieve all reservations which exceed capacity
+        sql = """
+        SELECT Reservation.reservationID, Reservation.datetime, User.email
+        FROM Reservation INNER JOIN User ON Reservation.userID = User.userID
+        WHERE Reservation.restaurantID = %s AND Reservation.tableID = %s
+        AND Reservation.persons > %s AND Reservation.datetime > NOW();
+        """
+
+        self.__cursor.execute(sql, (self.__restaurantID, self.__tableID, self.__capacity))
+        result = self.__cursor.fetchall()
+
+        # Iterate through each invalid reservation
+        for reservation in result:
+            reservationID, reservationDatetime, userEmail = reservation
+            # Delete the reservation
+            sql = "DELETE FROM Reservation WHERE reservationID = %s;"
+            try:
+                self.__cursor.execute(sql, (reservationID,))
+                self.__connection.commit()
+            except Exception as e:
+                # An error occurred deleting the reservation
+                self.__connection.rollback()
+                self.error = f"An error occurred deleting a future invalid reservation: {e}"
+                return
+
+            # Send cancellation email
+            sendEmail(userEmail, "Reservation Cancelled", """
+            Unfortunately, your reservation at <strong>%s</strong> has been cancelled,
+            as the table you reserved is no longer available. We apologise for any inconvenience caused.
+            """ % (reservationDatetime))
 
     def __del__(self):
         # This destructor closes the database connection
