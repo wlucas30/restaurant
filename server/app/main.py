@@ -1088,6 +1088,59 @@ def editTable():
 
     return jsonify(response)
 
+@app.route("/deleteTable", methods=["POST"])
+def deleteRestaurantTable():
+    """
+    This function allows users to delete a table from their restaurant
+    """
+
+    # Prepare response to be returned to the client
+    response = {
+        "success": False,
+        "error": None
+    }
+
+    userID, authToken, tableID = None, None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+        tableID = data["tableID"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+
+    """# Authenticate the provided token
+    authentication = authenticate(userID, authToken)
+    if not authentication[0]:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)"""
+
+    # Authentication succeeded, check whether the user is a professional
+    user = User(userID=userID)
+    if not user.professional:
+        # The user is not a professional, return an error
+        response["error"] = "The specified user is not a professional user"
+        return jsonify(response)
+
+    # Retrieve the user's restaurantID
+    user = ProfessionalUser(userID)
+    restaurantID = user.restaurantID
+
+    # Attempt to delete the table
+    table = Table(restaurantID, tableID=tableID)
+    if not table.deleteTable():
+        response["error"] = table.error
+    else:
+        response["success"] = True
+
+    del(table) # Closes the table's database connection
+
+    return jsonify(response)
+
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)

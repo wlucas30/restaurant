@@ -156,6 +156,50 @@ class Table:
             as the table you reserved is no longer available. We apologise for any inconvenience caused.
             """ % (reservationDatetime))
 
+    def deleteTable(self):
+        # Retrieve any reservations which will need to be deleted
+        sql = """
+        SELECT Reservation.reservationID, Reservation.datetime, User.email
+        FROM Reservation INNER JOIN User ON Reservation.userID = User.userID
+        WHERE Reservation.restaurantID = %s AND Reservation.tableID = %s
+        AND Reservation.datetime > NOW();
+        """
+        self.__cursor.execute(sql, (self.__restaurantID, self.__tableID))
+        result = self.__cursor.fetchall()
+
+        # Iterate through each reservation
+        for reservation in result:
+            reservationID, reservationDatetime, userEmail = reservation
+            # Delete the reservation
+            sql = "DELETE FROM Reservation WHERE reservationID = %s;"
+            try:
+                self.__cursor.execute(sql, (reservationID,))
+                self.__connection.commit()
+            except Exception as e:
+                # An error occurred deleting the reservation
+                self.__connection.rollback()
+                self.error = f"An error occurred deleting a future reservation: {e}"
+                return False
+
+            # Send cancellation email
+            sendEmail(userEmail, "Reservation Cancelled", """
+            Unfortunately, your reservation at <strong>%s</strong> has been cancelled,
+            as the table you reserved is no longer available. We apologise for any inconvenience caused.
+            """ % (reservationDatetime))
+
+        # This function deletes the table from the database
+        sql = "DELETE FROM RestaurantTable WHERE restaurantID = %s AND tableID = %s;"
+
+        try:
+            self.__cursor.execute(sql, (self.__restaurantID, self.__tableID))
+            self.__connection.commit()
+            return True
+        except Exception as e:
+            # An error occurred deleting the table
+            self.__connection.rollback()
+            self.error = f"An error occurred deleting the table: {e}"
+            return False
+
     def __del__(self):
         # This destructor closes the database connection
         self.__connection.close()
