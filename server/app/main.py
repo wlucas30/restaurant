@@ -1249,6 +1249,70 @@ def placeOrder():
     response["foodOrderID"] = order.getFoodOrderID()
     return jsonify(response)
 
+@app.route("/orderConfirmation", methods=["POST"])
+def orderConfirmation():
+    """
+    This function allows professional users to confirm an order at a restaurant
+    """
+
+    # Prepare response to be returned to the client
+    response = {
+        "success": False,
+        "error": None
+    }
+
+    userID, authToken, foodOrderID = None, None, None
+    confirmed, fulfilled, paid = None, None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+        foodOrderID = data["foodOrderID"]
+        confirmed, fulfilled, paid = data["confirmed"], data["fulfilled"], data["paid"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+
+    """# Authenticate the provided token
+    authentication = authenticate(userID, authToken)
+    if not authentication[0]:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)"""
+
+    # Check that the user is a professional
+    user = User(userID=userID)
+    if not user.professional:
+        # The user is not a professional, return an error
+        response["error"] = "The specified user is not a professional user"
+        return jsonify(response)
+
+    # The user is a professional, so find their restaurantID
+    user = ProfessionalUser(userID)
+    restaurantID = user.restaurantID
+
+    # Instantiate the order object
+    order = Order(foodOrderID=foodOrderID)
+    # Check for errors
+    if order.error is not None:
+        response["error"] = order.error
+        return jsonify(response)
+
+    # Check that the order belongs to the user's restaurant
+    if order.getRestaurantID() != restaurantID:
+        response["error"] = "The specified order does not belong to the specified restaurant"
+        return jsonify(response)
+
+    # Attempt to confirm the order
+    if not order.orderStatus(confirmed, fulfilled, paid):
+        response["error"] = order.error
+        return jsonify(response)
+
+    response["success"] = True
+    return jsonify(response)
+
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)

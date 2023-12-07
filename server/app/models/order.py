@@ -130,8 +130,51 @@ class Order:
             continue
         return True
 
+    def orderStatus(self, confirmed=False, fulfilled=False, paid=False):
+        # This function allows an order to be confirmed or rejected, or marked as fulfilled, or marked as paid
+        if fulfilled:
+            # Mark the order as fulfilled
+            sql = """
+            UPDATE FoodOrder
+            SET timeFulfilled = NOW(), confirmed = TRUE
+            WHERE foodOrderID = %s;
+            """
+        elif paid:
+            # Mark the order as paid
+            sql = """
+            UPDATE FoodOrder
+            SET paid = TRUE, confirmed = TRUE
+            WHERE foodOrderID = %s;
+            """
+        elif confirmed:
+            # Mark the order as confirmed
+            sql = """
+            UPDATE FoodOrder
+            SET confirmed = TRUE
+            WHERE foodOrderID = %s;
+            """
+        elif not confirmed and not (fulfilled or paid):
+            # This is a request to reject the order, so delete the order
+            sql = """
+            DELETE FROM FoodOrder
+            WHERE foodOrderID = %s;
+            """
+
+        # Attempt to execute the SQL query
+        try:
+            self.__cursor.execute(sql, (self.__foodOrderID,))
+            self.__connection.commit()
+            return True
+        except Exception as e:
+            self.__connection.rollback()
+            self.error = "An error occurred updating the order status"
+            return False
+
     def getFoodOrderID(self):
         return self.__foodOrderID
+
+    def getRestaurantID(self):
+        return self.__restaurantID
 
     def __del__(self):
         # Close the database connection when the object is destroyed
