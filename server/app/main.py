@@ -20,6 +20,7 @@ from services.retrieve_reservations import retrieveReservations
 from datetime import datetime
 from models.user import User, ProfessionalUser
 from models.table import Table
+from models.order import Order
 import json
 
 # This sets the app name
@@ -1193,6 +1194,59 @@ def getReservations():
         # No errors occurred, return the reservations
         response["reservations"] = reservations[0]
 
+    return jsonify(response)
+
+@app.route("/placeOrder", methods=["POST"])
+def placeOrder():
+    """
+    This function allows users to place an order at a restaurant
+    """
+
+    # Prepare response to be returned to the client
+    response = {
+        "foodOrderID": None,
+        "error": None
+    }
+
+    userID, authToken, restaurantID, tableID, menuItems = None, None, None, None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+        restaurantID, tableID = data["restaurantID"], data["tableID"]
+        menuItems = data["menuItems"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+
+    """# Authenticate the provided token
+    authentication = authenticate(userID, authToken)
+    if not authentication[0]:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)"""
+
+    # Place the order
+    order = Order(userID=userID, restaurantID=restaurantID, tableID=tableID)
+
+    # Check for errors
+    if order.error is not None:
+        response["error"] = order.error
+        return jsonify(response)
+
+    # Add the menu items to the order
+    for item in menuItems:
+        order.addItem(item["menuItemID"], item["quantity"])
+
+    # Check for errors
+    if order.error is not None:
+        response["error"] = order.error
+        return jsonify(response)
+
+    # Return the foodOrderID to the client
+    response["foodOrderID"] = order.getFoodOrderID()
     return jsonify(response)
 
 # This runs the app so that POST requests can be received
