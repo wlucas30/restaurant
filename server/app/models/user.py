@@ -1,6 +1,5 @@
 from services.db_connection import connect
 from email_validator import validate_email, EmailNotValidError
-from services.authenticate import authenticate
 
 # This class is used for organising data about users of the system
 class User:
@@ -76,12 +75,12 @@ class User:
             return False
     
     def changeEmail(self, new_email, auth_token):
+        from services.authenticate import authenticate
         # Validate the provided email
         if not self.validateEmail(new_email):
             return
         
         # Check that the provided authentication token is valid
-        print(self.userID)
         authentication = authenticate(self.userID, auth_token)
         
         if not authentication[0]:

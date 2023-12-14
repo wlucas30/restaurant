@@ -4,7 +4,7 @@ from services.restaurant_details import getRestaurantDetails
 from services.email_verification import beginVerification
 from services.check_verification import checkVerificationCode
 from services.auth_token import getAuthToken
-from services.authenticate import authenticate
+from services.authenticate import authenticate, authenticateProfessional
 from services.make_review import makeReview
 from services.get_reviews import getReviews
 from services.restaurant_search import restaurantSearch
@@ -17,6 +17,7 @@ from services.delete_image import deleteRestaurantImage
 from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem, saveMenuItemImage, getMenu, deleteMenuItemImage
 from services.restaurant import getTables
 from services.retrieve_reservations import retrieveReservations
+from services.queue import getUnfulfilledOrders
 from datetime import datetime
 from models.user import User, ProfessionalUser
 from models.table import Table
@@ -1311,6 +1312,52 @@ def orderConfirmation():
         return jsonify(response)
 
     response["success"] = True
+    return jsonify(response)
+
+@app.route("/getOrderQueue", methods=["POST"])
+def getOrderQueue():
+    """
+    This function allows professional users to retrieve the order queue for their restaurant
+    """
+    # Prepare response to be returned to the client
+    response = {
+        "orders": None,
+        "error": None
+    }
+
+    userID, authToken, lastStoredFoodOrderID = None, None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+        lastStoredFoodOrderID = data["lastStoredFoodOrderID"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+
+    # Authenticate the provided token and retrieve the user's restaurantID
+    authentication = authenticateProfessional(userID, authToken)
+    if authentication[1] is not None:
+        # An error has occurred
+        response["erorr"] = authentication[1]
+        return jsonify(response)
+
+    # No error occurred, retrieve the restaurantID
+    restaurantID = authentication[0]
+
+    # Retrieve the order queue
+    orders = getUnfulfilledOrders(restaurantID, lastStoredFoodOrderID)
+
+    # Check if any errors occurred during order retrieval
+    if orders[0] is None:
+        # An error has occurred
+        response["error"] = orders[1]
+    else:
+        # No errors occurred, return the orders
+        response["orders"] = orders[0]
+
     return jsonify(response)
 
 # This runs the app so that POST requests can be received

@@ -2,6 +2,8 @@ from services.db_connection import connect
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
+from models.user import User, ProfessionalUser
+
 # This function checks whether a provided authentication token is valid
 def authenticate(userID, token):
     # Attempt to connect to the database
@@ -64,3 +66,24 @@ def authenticate(userID, token):
     else:
         # An error has occurred, return the error message
         return (False, connection[1])
+
+# This function authenticates professional users and returns their restaurantID
+def authenticateProfessional(userID, token):
+    """# First authenticate the provided token
+    authentication = authenticate(userID, token)
+    if not authentication[0]:
+        # The authentication failed, return the error
+        return (None, authentication[1])"""
+
+    # Check that the user is a professional
+    user = User(userID=userID)
+    if not user.professional:
+        # The user is not a professional, return an error
+        return (None, "The user is not a professional")
+
+    # The user is a professional, so find their restaurantID
+    user = ProfessionalUser(userID)
+    restaurantID = user.restaurantID
+
+    # Return the restaurantID
+    return (restaurantID, None)
