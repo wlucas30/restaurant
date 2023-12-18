@@ -18,6 +18,7 @@ from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem, save
 from services.restaurant import getTables
 from services.retrieve_reservations import retrieveReservations
 from services.queue import getUnfulfilledOrders
+from services.bill import retrieveBill
 from datetime import datetime
 from models.user import User, ProfessionalUser
 from models.table import Table
@@ -1349,6 +1350,41 @@ def getOrderQueue():
 
     # Retrieve the order queue
     orders = getUnfulfilledOrders(restaurantID, lastStoredFoodOrderID)
+
+    # Check if any errors occurred during order retrieval
+    if orders[0] is None:
+        # An error has occurred
+        response["error"] = orders[1]
+    else:
+        # No errors occurred, return the orders
+        response["orders"] = orders[0]
+
+    return jsonify(response)
+
+@app.route("/getTableBill", methods=["POST"])
+def getTableBill():
+    """
+    This function allows users to retrieve the bill for a table (unpaid orders)
+    """
+
+    # Prepare response to be returned to the client
+    response = {
+        "orders": None,
+        "error": None
+    }
+
+    tableID = None
+    try:
+        data = request.json
+        tableID = data["tableID"]
+    except KeyError:
+        response["error"] = "Missing required parameter"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+
+    # Retrieve the bill
+    orders = retrieveBill(tableID)
 
     # Check if any errors occurred during order retrieval
     if orders[0] is None:
