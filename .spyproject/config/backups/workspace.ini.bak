@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['server/app/main.py', 'server/app/services/save_image.py', 'server/app/services/update_restaurant.py', 'server/app/services/make_review.py', 'server/app/models/user.py']
+recent_files = ['server/app/main.py', 'server/app/services/save_image.py', 'server/app/services/update_restaurant.py', 'server/app/services/make_review.py', 'server/app/models/user.py', '../../Desktop/SantaWorkshop/main.py', 'server/app/test_db.py']
 
 [main]
 version = 0.2.0

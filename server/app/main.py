@@ -19,6 +19,7 @@ from services.restaurant import getTables
 from services.retrieve_reservations import retrieveReservations
 from services.queue import getUnfulfilledOrders
 from services.bill import retrieveBill
+from services.order_eta import getOrderEta
 from datetime import datetime
 from models.user import User, ProfessionalUser
 from models.table import Table
@@ -1393,6 +1394,41 @@ def getTableBill():
     else:
         # No errors occurred, return the orders
         response["orders"] = orders[0]
+
+    return jsonify(response)
+
+@app.route("/getOrderEta", methods=["POST"])
+def getWaitingTime():
+    """
+    This function allows users to retrieve the estimated waiting time for their order
+    """
+
+    # Prepare response to be returned to the client
+    response = {
+        "eta": None,
+        "error": None
+    }
+
+    foodOrderID = None
+    try:
+        data = request.json
+        foodOrderID = data["foodOrderID"]
+    except KeyError:
+        response["error"] = "Missing required parameter"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+
+    # Retrieve the waiting time
+    eta = getWaitingTime(foodOrderID)
+
+    # Check if any errors occurred during order retrieval
+    if eta[0] is None:
+        # An error has occurred
+        response["error"] = eta[1]
+    else:
+        # No errors occurred, return the orders
+        response["eta"] = eta[0]
 
     return jsonify(response)
 
