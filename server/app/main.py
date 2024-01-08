@@ -14,12 +14,13 @@ from services.update_restaurant import updateRestaurant
 from services.save_image import saveRestaurantImage
 from services.get_image import getRestaurantImages
 from services.delete_image import deleteRestaurantImage
-from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem, saveMenuItemImage, getMenu, deleteMenuItemImage
+from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem, saveMenuItemImage, getMenu
 from services.restaurant import getTables
 from services.retrieve_reservations import retrieveReservations
 from services.queue import getUnfulfilledOrders
 from services.bill import retrieveBill
 from services.order_eta import getOrderEta
+from services.metrics import getMetrics
 from datetime import datetime
 from models.user import User, ProfessionalUser
 from models.table import Table
@@ -1420,7 +1421,7 @@ def getWaitingTime():
         response["error"] = "Invalid data format"
 
     # Retrieve the waiting time
-    eta = getWaitingTime(foodOrderID)
+    eta = getOrderEta(foodOrderID)
 
     # Check if any errors occurred during order retrieval
     if eta[0] is None:
@@ -1429,6 +1430,59 @@ def getWaitingTime():
     else:
         # No errors occurred, return the orders
         response["eta"] = eta[0]
+
+    return jsonify(response)
+
+@app.route("/getRestaurantMetrics", methods=["POST"])
+def getRestaurantMetrics():
+    """
+    This function allows users to retrieve metrics for their restaurant
+    """
+
+    # Prepares response to be returned to the client
+    response = {
+        "metrics": None,
+        "error": None
+    }
+
+    userID, authToken = None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+
+    # Authenticate the provided token
+    """authentication = authenticate(userID, authToken)
+    if not authentication[0]:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)"""
+
+    # Authentication succeeded, check whether the user is a professional
+    user = User(userID=userID)
+    if not user.professional:
+        # The user is not a professional, return an error
+        response["error"] = "The specified user is not a professional user"
+        return jsonify(response)
+
+    # The user is a professional, so find their restaurantID
+    user = ProfessionalUser(userID)
+    restaurantID = user.restaurantID
+
+    # Retrieve the metrics
+    metrics = getMetrics(restaurantID)
+
+    # Check if any errors occurred during metric retrieval
+    if metrics[0] is None:
+        # An error has occurred
+        response["error"] = metrics[1]
+    else:
+        # No errors occurred, return the metrics
+        response["metrics"] = metrics[0]
 
     return jsonify(response)
 
