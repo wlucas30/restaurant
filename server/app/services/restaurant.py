@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from services.db_connection import connect
+from services.email import sendEmail
 
 # This function allows all of a restaurant's tables to be retrieved
 def getTables(restaurantID):
@@ -34,7 +35,6 @@ def getTables(restaurantID):
         return (None, connection[1])
 
 def setOpeningPeriods(restaurantID, openingPeriods):
-    print("Hello")
     # Ensure that the provided opening periods are valid
     if not validateOpeningPeriods(openingPeriods):
         return (False, "Invalid opening periods provided")
@@ -44,7 +44,6 @@ def setOpeningPeriods(restaurantID, openingPeriods):
     if connection[0] is not None:
         with connection[0] as connection:
             with connection.cursor() as cursor:
-                print("Hi")
                 # Delete all of the restaurant's existing opening periods
                 sql = "DELETE FROM OpeningPeriod WHERE restaurantID = %s;"
                 try:
@@ -68,6 +67,7 @@ def setOpeningPeriods(restaurantID, openingPeriods):
                         return (False, f"An error occurred inserting the opening period: {e}")
 
                 # Return no error
+                deleteInvalidReservations(restaurantID, connection, cursor)
                 return (True, None)
     else:
         # An error occurred connecting to the database
@@ -110,3 +110,57 @@ def validateOpeningPeriods(openingPeriods):
             return False
 
     return True
+
+def deleteInvalidReservations(restaurantID, connection, cursor):
+    # This function deletes any stored reservations which are placed outside of the restaurant's opening hours
+    # Retrieve the restaurant's opening periods
+    sql = "SELECT dayOfWeek, openingTime, closingTime FROM OpeningPeriod WHERE restaurantID = %s;"
+    cursor.execute(sql, (restaurantID,))
+    result = cursor.fetchall()
+
+    # Format the opening periods into a dictionary
+    openingPeriods = {}
+    for row in result:
+        dayOfWeek, openingTime, closingTime = row
+        openingPeriods[dayOfWeek] = {
+            "openingTime": openingTime,
+            "closingTime": closingTime
+        }
+
+    print(restaurantID)
+    print(openingPeriods)
+
+    # Retrieve all of the restaurant's reservations
+    sql = """
+    SELECT 
+    Reservation.reservationID, Reservation.datetime, User.email 
+    FROM Reservation INNER JOIN User
+    ON Reservation.userID = User.userID
+    WHERE restaurantID = %s;
+    """
+    cursor.execute(sql, (restaurantID,))
+    result = cursor.fetchall()
+    print(result)
+    # Iterate through each reservation and delete it if it is outside of the restaurant's opening hours
+    for row in result:
+        reservationID, rdatetime, userEmail = row
+        dayOfWeek = (rdatetime.weekday()) + 1 # avoids 0 based indexing
+        openingTime = openingPeriods[dayOfWeek]["openingTime"]
+        # Subtract 1 hour from the closing time to account for the time taken to fulfill the order
+        closingTime = openingPeriods[dayOfWeek]["closingTime"] - timedelta(hours=1)
+
+        # Convert opening and closing time timedelta objects to time objects
+        openingTime = datetime.strptime(str(openingTime), "%H:%M:%S").time()
+        closingTime = datetime.strptime(str(closingTime), "%H:%M:%S").time()
+
+        # Delete the reservation if it is outside of the restaurant's opening hours
+        if rdatetime.time() < openingTime or rdatetime.time() >= closingTime:
+            sql = "DELETE FROM Reservation WHERE reservationID = %s;"
+            cursor.execute(sql, (reservationID,))
+            connection.commit()
+
+            # Send cancellation email
+            sendEmail(userEmail, "Reservation Cancelled",
+            """
+            Sorry, your reservation has been cancelled as it is outside of the restaurant's opening hours.
+            """)
