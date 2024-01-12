@@ -1212,12 +1212,13 @@ def placeOrder():
         "error": None
     }
 
-    userID, authToken, restaurantID, tableID, menuItems = None, None, None, None, None
+    userID, authToken, restaurantID, tableID, menuItems, customisation = None, None, None, None, None, None
     try:
         data = request.json
         userID, authToken = data["userID"], data["authToken"]
         restaurantID, tableID = data["restaurantID"], data["tableID"]
         menuItems = data["menuItems"]
+        customisation = data["customisation"]
     except KeyError:
         response["error"] = "Missing required parameters"
         return jsonify(response)
@@ -1233,7 +1234,7 @@ def placeOrder():
         return jsonify(response)"""
 
     # Place the order
-    order = Order(userID=userID, restaurantID=restaurantID, tableID=tableID)
+    order = Order(userID=userID, restaurantID=restaurantID, tableID=tableID, customisation=customisation)
 
     # Check for errors
     if order.error is not None:

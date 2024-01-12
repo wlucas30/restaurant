@@ -2,9 +2,10 @@ from services.db_connection import connect
 
 # This class will be used to represent each food order placed by users
 class Order:
-    def __init__(self, foodOrderID=None, userID=None, restaurantID=None, tableID=None):
+    def __init__(self, foodOrderID=None, userID=None, restaurantID=None, tableID=None, customisation=""):
         self.__foodOrderID = foodOrderID
         self.__userID = userID
+        self.__customisation = customisation
 
         # Optional parameters for creating a new order
         self.__restaurantID = restaurantID
@@ -39,13 +40,13 @@ class Order:
     def __createNew(self):
         # This function creates a new order in the database
         sql = """
-        INSERT INTO FoodOrder (userID, restaurantID, tableID, price, timeOrdered, timeFulfilled, confirmed, paid)
-        VALUES (%s, %s, %s, 0.00, NOW(), NULL, FALSE, FALSE);
+        INSERT INTO FoodOrder (userID, restaurantID, tableID, price, timeOrdered, timeFulfilled, confirmed, paid, customisation)
+        VALUES (%s, %s, %s, 0.00, NOW(), NULL, FALSE, FALSE, %s);
         """
 
         # Attempt to execute the SQL query
         try:
-            self.__cursor.execute(sql, (self.__userID, self.__restaurantID, self.__tableID))
+            self.__cursor.execute(sql, (self.__userID, self.__restaurantID, self.__tableID, self.__customisation))
             self.__connection.commit()
 
             # The order was created successfully, so retrieve the new orderID
@@ -63,7 +64,7 @@ class Order:
     def __retrieveData(self):
         # This function retrieves data about an existing order from the database
         sql = """
-        SELECT userID, restaurantID, tableID, price, timeOrdered, timeFulfilled, confirmed, paid
+        SELECT userID, restaurantID, tableID, price, timeOrdered, timeFulfilled, confirmed, paid, customisation
         FROM FoodOrder
         WHERE foodOrderID = %s;
         """
@@ -76,7 +77,7 @@ class Order:
             return False
         else:
             # The order exists, so store the data
-            self.__userID, self.__restaurantID, self.__tableID, self.__price, self.__timeOrdered, self.__timeFulfilled, self.__confirmed, self.__paid = result
+            self.__userID, self.__restaurantID, self.__tableID, self.__price, self.__timeOrdered, self.__timeFulfilled, self.__confirmed, self.__paid, self.__customisation = result
             return True
 
     def addItem(self, menuItemID, quantity=1):
