@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaLocationArrow } from 'react-icons/fa';
 import "./Home.css";
 
-// Initialise variables for storing user location data
-var latitude;
-var longitude;
-
-function LocationPicker() {
-	// This component is a button which displays the user's predicted location and
-	// allows the user to give access to their precise location
+function LocationPicker({ latitude, setLatitude, longitude, setLongitude }) {
+	// This component is a button which allows the user to give access to their precise location
 	const [cityName, setCityName] = useState("No location found");
 
 	function getCityName() {
@@ -16,8 +11,8 @@ function LocationPicker() {
 		if (navigator.geolocation) {
 			// Request the user's current coordinates for the user
 			navigator.geolocation.getCurrentPosition(async function(position) {
-				latitude = position.coords.latitude;
-				longitude = position.coords.longitude;
+				setLatitude(position.coords.latitude);
+				setLongitude(position.coords.longitude);
 	
 				try {
 					// Fetch location data from OpenStreetMap API and then serialise it as JSON
@@ -55,39 +50,181 @@ function LocationPicker() {
 	);
 }
 
-function Restaurant({ restaurantName, restaurantDescription, imageName }) {
-	return (
-		<div className="restaurantContainer">
-			<div>
-				<t className="restaurantName">{restaurantName}</t>
+function Restaurant({ restaurantID, setPage }) {
+	// This function retrieves data about the restaurant
+	async function getRestaurantData(restaurantID) {
+		// Make a POST request to the backend to retrieve restaurant data
+		const response = await fetch('https://localhost:8080/restaurantDetails', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				restaurantID: restaurantID,
+			}), 
+		});
+
+		// Decode the response as JSON
+		const data = await response.json();
+
+		// Check for errors
+		if (data.error) {
+			// Throw an error if there is one
+			throw new Error(data.error);
+		} else {
+			// Return the restaurant data
+			return data.details;
+		}
+	}
+
+	// This function retrieves the image for the restaurant
+	async function getRestaurantImage(restaurantID) {
+		// Make a POST request to the backend to retrieve restaurant images
+		const response = await fetch('https://localhost:8080/getRestaurantImages', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				restaurantID: restaurantID,
+			}),
+		});
+
+		// Decode the response as JSON
+		const data = await response.json();
+		// The returned data is in JSON format with an array of images stored in base64 format
+		// The first image is the restaurant image, so we can simply return that
+		if (data.error) {
+			throw new Error(data.error);
+		} else {
+			// The images are stored in a dictionary, so return the first value of the dictionary
+			return Object.values(data.images)[0];
+		}
+	}
+
+	// This component displays a single restaurant
+	// Retrieve restaurant data from the backend, catching any errors
+	const [restaurantData, setRestaurantData] = useState([]);
+	const [restaurantImage, setRestaurantImage] = useState(null);
+	const [error, setError] = useState(null); 
+
+	// Retrieve restaurant data when the component is first rendered
+	useEffect(() => {
+		// Retrieve restaurant data
+		getRestaurantData(restaurantID)
+			.then((data) => {
+				setRestaurantData(data);
+				setError(null); // Clear any previous errors
+			})
+			.catch((error) => setError(error));
+		
+		// Retrieve restaurant image
+		getRestaurantImage(restaurantID)
+			.then((data) => {
+				setRestaurantImage(data);
+				setError(null); // Clear any previous errors
+			})
+			.catch((error) => setError(error));
+	}, [restaurantID]); // This function runs when the restaurantID is set
+
+	// If an error occurred, display it
+	if (error) {
+		return <div className="restaurantContainer">Error getting restaurant {restaurantID} details: {error.message}</div>
+	} else {
+		return (
+			<div className="restaurantContainer" onClick={() => setPage("viewRestaurantDetails:" + restaurantID)}>
+				<div>
+					<t className="restaurantName">{restaurantData.name}</t>
+				</div>
+				<div>
+					<t className="restaurantDescription">{restaurantData.description}</t>
+				</div>
+				<div className="restaurantImageContainer">
+					<img className="restaurantImage" src={`data:image/jpeg;base64,${restaurantImage}`} />
+				</div>
 			</div>
-			<div>
-				<t className="restaurantDescription">{restaurantDescription}</t>
-			</div>
-			<div className="restaurantImageContainer">
-				<img className="restaurantImage" src={require("../Assets/".concat(imageName))} alt="Image of restaurant" />
-			</div>
-		</div>
-	);
+		);
+	}
 }
 
-function RestaurantList() {
-	// This component displays a list of nearby restaurants
-	return (
-		// Currently populated with manual data, must change so this component dynamically updates
-		<div>
-			<Restaurant restaurantName="Will's Kitchen" restaurantDescription="0.25 miles away" imageName="1.jpeg" />
-			<Restaurant restaurantName="Savory Haven Grill" restaurantDescription="2.3 miles away" imageName="2.jpeg" />
-		</div>
-	);
+function RestaurantList({ latitude, longitude, setPage }) {
+	// This function retrieves restaurant data from the backend and displays it
+	// Initialise state variable for storing restaurant data
+	const [restaurants, setRestaurants] = useState([]);
+	const [error, setError] = useState(null);
+	const [isLoading, setIsLoading] = useState(true);
+
+	useEffect(() => {
+		async function retrieveRestaurants(latitude, longitude, random=false) {
+			// Make a POST request to the backend to retrieve restaurant data
+			const response = await fetch("https://localhost:8080/nearbyRestaurants", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					latitude: latitude || null, // If latitude is undefined, set it to null
+					longitude: longitude || null,
+					random: random,
+				}),
+			});
+
+			// Decode the response as JSON
+			const data = await response.json();
+			// Check for errors
+			if (data.error) {
+				// Throw an error if there is one
+				setError(Error(data.error));
+			} else {
+				// Return the restaurant data 
+				setError(null); // Clear any previous errors
+				setRestaurants(data.restaurants);
+			}
+		}
+
+		retrieveRestaurants(latitude, longitude, !(latitude && longitude))
+			.then(() => setIsLoading(false))
+
+	}, [latitude, longitude]) // This function runs when the latitude or longitude changes
+
+	// This component displays a list of nearby restaurants, or random restaurants if no location is available
+	// If an error is stored, display it
+	if (error) {
+		return <p>Error finding nearby restaurants: {error.message}</p>
+	} else if (isLoading) {
+		return <p>Loading...</p>
+	} else {
+		// if the array contains subarrays, extract the restaurantID from each subarray
+		if (restaurants.length > 0 && restaurants[0] instanceof Array) {
+			// Iterate through and change each subarray to just the restaurantID
+			setRestaurants(restaurants.map((restaurant) => restaurant[0]));
+		}
+		return (
+			<div> 
+				{
+					// Display each restaurant in the list
+					restaurants.map((restaurant) => (
+						<Restaurant
+							restaurantID={restaurant}
+							setPage={setPage}
+						/>
+					)) 
+				}
+			</div>
+		);
+	}
 }
 
-export default function Home() {
+export default function Home({ setPage }) {
+	// Initialise state variables for storing user location data
+	const [latitude, setLatitude] = useState(null);
+	const [longitude, setLongitude] = useState(null);
+
     return (
       	<div className="homeBody">
         	<t className="homeTitle">Restaurants near you</t>
-        	<LocationPicker />
-			<RestaurantList />
+        	<LocationPicker latitude={latitude} setLatitude={setLatitude} longitude={longitude} setLongitude={setLongitude}/>
+			<RestaurantList latitude={latitude} longitude={longitude} setPage={setPage}/>
      	</div>
     );
 }

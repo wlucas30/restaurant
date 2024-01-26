@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from services.nearby_restaurants import getNearbyRestaurants, getRandomRestaurants
 from services.restaurant_details import getRestaurantDetails
 from services.email_verification import beginVerification
@@ -29,6 +30,7 @@ import json
 
 # This sets the app name
 app = Flask("tableNest")
+CORS(app)
 
 @app.route("/nearbyRestaurants", methods=["POST"])
 def nearbyRestaurants():
@@ -1540,4 +1542,4 @@ def setRestaurantOpeningPeriods():
 
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
-    app.run(host="localhost", port=8080)
+    app.run(host="localhost", port=8080, ssl_context=("/Users/wl/Documents/restaurant/restaurant-frontend/localhost+1.pem", "/Users/wl/Documents/restaurant/restaurant-frontend/localhost+1-key.pem"))
