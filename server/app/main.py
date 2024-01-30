@@ -19,6 +19,7 @@ from services.menu_item import addMenuItem, deleteMenuItem, changeMenuItem, save
 from services.restaurant import getTables, setOpeningPeriods
 from services.retrieve_reservations import retrieveReservations
 from services.queue import getUnfulfilledOrders
+from services.db_connection import connect
 from services.bill import retrieveBill
 from services.order_eta import getOrderEta
 from services.metrics import getMetrics
@@ -1537,6 +1538,53 @@ def setRestaurantOpeningPeriods():
         response["error"] = periods[1]
     else:
         response["success"] = True
+
+    return jsonify(response)
+
+@app.route("/getUserEvents", methods=["POST"])
+def getUserEvents():
+    """
+    This function allows users to retrieve events stored on their account
+    (reservations and food orders)
+    """
+    # Prepares response to be returned to the client
+    response = {
+        "reservations": None,
+        "foodOrders": None,
+        "error": None
+    }
+
+    userID, authToken = None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+
+    # Authenticate the provided token
+    """authentication = authenticate(userID, authToken)
+    if not authentication[0]:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)"""
+
+    # Initialise a user object
+    user = User(userID=userID)
+
+    # Check if any errors occurred during user initialisation
+    if user.error is not None:
+        # An error has occurred
+        response["error"] = user.error
+        return jsonify(response)
+
+    # Retrieve reservations and food orders
+    with connect()[0] as connection:
+        with connection.cursor() as cursor:
+            response["reservations"] = user.getReservations(cursor)
+            response["foodOrders"] = user.getOrders(cursor)
 
     return jsonify(response)
 

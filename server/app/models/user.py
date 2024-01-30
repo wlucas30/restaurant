@@ -124,6 +124,52 @@ class User:
             self.error = str(e)
             return False
 
+    def getOrders(self, cursor):
+        # Returns a list of orders placed by this user
+        sql = """
+        SELECT
+            Restaurant.name, 
+            FoodOrder.price, 
+            FoodOrder.timeOrdered 
+        FROM FoodOrder INNER JOIN Restaurant
+        ON FoodOrder.restaurantID = Restaurant.restaurantID
+        WHERE userID = %s;"""
+        cursor.execute(sql, (self.userID,))
+        result = cursor.fetchall()
+
+        # Map the result to a list of dictionaries
+        orders = []
+        for row in result:
+            orders.append({
+                "restaurantName": row[0],
+                "price": row[1],
+                "timeOrdered": row[2]
+            })
+
+        return orders
+
+    def getReservations(self, cursor):
+        # Returns a list of reservations placed by this user
+        sql = """
+        SELECT
+            Restaurant.name,
+            Reservation.datetime
+        FROM Reservation INNER JOIN Restaurant
+        ON Reservation.restaurantID = Restaurant.restaurantID
+        WHERE userID = %s;"""
+        cursor.execute(sql, (self.userID,))
+        result = cursor.fetchall()
+
+        # Map the result to a list of dictionaries
+        reservations = []
+        for row in result:
+            reservations.append({
+                "restaurantName": row[0],
+                "datetime": row[1]
+            })
+
+        return reservations
+
 # This class inherits from the User class
 class ProfessionalUser(User):
     def __init__(self, userID):
