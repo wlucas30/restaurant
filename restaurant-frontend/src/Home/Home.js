@@ -147,7 +147,7 @@ function Restaurant({ restaurantID, setPage }) {
 	}
 }
 
-function RestaurantList({ latitude, longitude, setPage }) {
+function RestaurantList({ latitude, longitude, setPage, searchResults, searchError }) {
 	// This function retrieves restaurant data from the backend and displays it
 	// Initialise state variable for storing restaurant data
 	const [restaurants, setRestaurants] = useState([]);
@@ -193,6 +193,22 @@ function RestaurantList({ latitude, longitude, setPage }) {
 		return <p>Error finding nearby restaurants: {error.message}</p>
 	} else if (isLoading) {
 		return <p>Loading...</p>
+	} else if (searchError) {
+		return <p>Error searching for restaurants: {searchError.message}</p>
+	} else if (searchResults && searchResults.length > 0) {
+		return (
+			<div>
+				{
+					// Display each restaurant in the list
+					searchResults.map((restaurant) => (
+						<Restaurant
+							restaurantID={restaurant.restaurantID}
+							setPage={setPage}
+						/>
+					)) 
+				}
+			</div>
+		);
 	} else {
 		// if the array contains subarrays, extract the restaurantID from each subarray
 		if (restaurants.length > 0 && restaurants[0] instanceof Array) {
@@ -215,16 +231,148 @@ function RestaurantList({ latitude, longitude, setPage }) {
 	}
 }
 
+function RestaurantSearchBar({ setSearchResults, setSearchError }) {
+	// Store the search term in a state variable
+	const [searchTerm, setSearchTerm] = useState("");
+
+	// Retrieve search results from the backend when the search term changes
+	useEffect(() => {
+		async function retrieveSearchResults(searchTerm) {
+			// If no search term is provided, return an empty array
+			if (searchTerm.length == 0) {
+				return { results: [] };
+			}
+
+			// Make a POST request to the backend to retrieve restaurant data
+			const response = await fetch("https://localhost:8080/restaurantSearch", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					searchTerm: searchTerm,
+				}),
+			});
+			
+			// Decode the response as JSON
+			const data = await response.json();
+			// Check for errors
+			if (data.error) {
+				// Throw an error if there is one - this will be displayed
+				throw new Error(data.error);
+			} else {
+				// Return the restaurants to be stored in the state variable
+				return data;
+			}
+		}
+		retrieveSearchResults(searchTerm)
+			.then((data) => setSearchResults(data.results))
+			.catch((error) => setSearchError(error));
+	}, [searchTerm]);
+
+	return (
+		<div>
+			<input className="searchBar" type="search" placeholder="Search" onChange={(event) => setSearchTerm(event.target.value)} />
+		</div>
+	);
+}
+
 export default function Home({ setPage }) {
 	// Initialise state variables for storing user location data
 	const [latitude, setLatitude] = useState(null);
 	const [longitude, setLongitude] = useState(null);
 
+	// State variable for storing search results for restaurants
+	const [searchResults, setSearchResults] = useState([]);
+	const [searchError, setSearchError] = useState(null);
+
     return (
       	<div className="homeBody">
         	<t className="homeTitle">Restaurants near you</t>
         	<LocationPicker latitude={latitude} setLatitude={setLatitude} longitude={longitude} setLongitude={setLongitude}/>
-			<RestaurantList latitude={latitude} longitude={longitude} setPage={setPage}/>
+			<RestaurantSearchBar setSearchResults={setSearchResults} setSearchError={setSearchError}/>
+			<RestaurantList latitude={latitude} longitude={longitude} setPage={setPage} searchResults={searchResults} searchError={searchError}/>
      	</div>
     );
+}
+
+function RestaurantList({ latitude, longitude, setPage, searchResults, searchError }) {
+	if (searchError) {
+		return <p>Error searching for restaurants: {searchError.message}</p>
+	} else if (searchResults && searchResults.length > 0) {
+		return (
+			<div>
+				{
+					// Display each restaurant in the list
+					searchResults.map((restaurant) => (
+						<Restaurant
+							restaurantID={restaurant.restaurantID}
+							setPage={setPage}
+						/>
+					)) 
+				}
+			</div>
+		);
+	}
+}
+
+function RestaurantSearchBar({ setSearchResults, setSearchError }) {
+	// Store the search term in a state variable
+	const [searchTerm, setSearchTerm] = useState("");
+
+	// Retrieve search results from the backend when the search term changes
+	useEffect(() => {
+		async function retrieveSearchResults(searchTerm) {
+			// If no search term is provided, return an empty array
+			if (searchTerm.length == 0) {
+				return { results: [] };
+			}
+
+			// Make a POST request to the backend to retrieve restaurant data
+			const response = await fetch("https://localhost:8080/restaurantSearch", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					searchTerm: searchTerm,
+				}),
+			});
+			
+			// Decode the response as JSON
+			const data = await response.json();
+			// Check for errors
+			if (data.error) {
+				// Throw an error if there is one - this will be displayed
+				throw new Error(data.error);
+			} else {
+				// Return the restaurants to be stored in the state variable
+				return data;
+			}
+		}
+		retrieveSearchResults(searchTerm)
+			.then((data) => setSearchResults(data.results))
+			.catch((error) => setSearchError(error));
+	}, [searchTerm]);
+
+	return (
+		<div>
+			<input className="searchBar" type="search" placeholder="Search" onChange={(event) => setSearchTerm(event.target.value)} />
+		</div>
+	);
+}
+
+export default function Home({ setPage }) {
+	// State variable for storing search results for restaurants
+	const [searchResults, setSearchResults] = useState([]);
+	const [searchError, setSearchError] = useState(null);
+
+	return (
+		<div className="homeBody">
+		  <t className="homeTitle">Restaurants near you</t>
+		  <LocationPicker latitude={latitude} setLatitude={setLatitude} longitude={longitude} setLongitude={setLongitude}/>
+		  <RestaurantSearchBar setSearchResults={setSearchResults} setSearchError={setSearchError}/>
+		  <RestaurantList latitude={latitude} longitude={longitude} setPage={setPage} searchResults={searchResults} searchError={searchError}/>
+	   </div>
+ 	);
 }

@@ -53,3 +53,11 @@
     width: 90vw;
     border-radius: 7px;
 }
+
+.searchBar {
+    width: 100%;
+    margin-bottom: 1vh;
+    padding: 5px;
+    border: 1px solid grey;
+    border-radius: 7px;
+}
