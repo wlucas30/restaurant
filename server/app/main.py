@@ -1588,6 +1588,47 @@ def getUserEvents():
 
     return jsonify(response)
 
+@app.route("/cancelReservation", methods=["POST"])
+def cancelReservation():
+    # This function allows users to cancel a reservation
+    response = {
+        "success": False,
+        "error": None
+    }
+
+    userID, authToken, reservationID = None, None, None
+    try:
+        data = request.json
+        userID, authToken = data["userID"], data["authToken"]
+        reservationID = data["reservationID"]
+    except KeyError:
+        response["error"] = "Missing required parameters"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+
+    # Authenticate the provided token
+    """authentication = authenticate(userID, authToken)
+    if not authentication[0]:
+        # Authentication failed
+        response["error"] = authentication[1]
+        return jsonify(response)"""
+
+    # Create database connection
+    connection = connect()
+    if connection[0] is not None:
+        with connection[0] as connection:
+            with connection.cursor() as cursor:
+                sql = "DELETE FROM Reservation WHERE reservationID=%s AND userID=%s;"
+                cursor.execute(sql, (reservationID, userID))
+                connection.commit()
+    else:
+        response["error"] = connection[1]
+        return jsonify(response)
+
+    response["success"] = True
+    return jsonify(response)
+
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080, ssl_context=("/Users/wl/Documents/restaurant/restaurant-frontend/localhost+1.pem", "/Users/wl/Documents/restaurant/restaurant-frontend/localhost+1-key.pem"))
