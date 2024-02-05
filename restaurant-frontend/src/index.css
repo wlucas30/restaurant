@@ -6,3 +6,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.backButton {
+  margin: 2%;
+  color: black;
+  font-size: 100%;
+}

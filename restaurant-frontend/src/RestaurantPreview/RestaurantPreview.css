@@ -1,0 +1,43 @@
+.restaurantDetailsPane {
+    margin: 2vh;
+}
+
+.reviewPane {
+    margin: 2vh;
+}
+
+.restaurantDetailsPane > p {
+    font-size: larger;
+    font-weight: 400;
+}
+
+.bookingOptions {
+    margin-top: 5vh;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.bookingOptions > button {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px; 
+    width: 85%;
+    color: black;
+    padding: 5px;
+    border-radius: 7px;
+    border: 1px solid grey;
+    font-size: 100%;
+    font-weight: 400;
+}
+
+.imageCarousel {
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.reviewPane > button {
+    color: black;
+    font-size: 80%;
+}

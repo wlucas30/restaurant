@@ -1,7 +1,0 @@
-HTTP/1.1 200 OK
-Server: Werkzeug/2.3.7 Python/3.11.6
-Date: Fri, 01 Dec 2023 09:26:30 GMT
-Content-Type: application/json
-Content-Length: 152
-Connection: close
-

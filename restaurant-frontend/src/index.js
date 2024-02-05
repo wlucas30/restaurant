@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import Home from './Home/Home';
+import RestaurantPreview from './RestaurantPreview/RestaurantPreview';
 import TopBar from './Topbar/Topbar';
 
 function App() {
@@ -12,11 +13,11 @@ function App() {
 	function renderCurrentPage(currentPage) {
 		if (currentPage == "home") {
 			return <Home setPage={setPage}/>;
-		/*} else if (currentPage.startsWith("viewRestaurantDetails:")) {
+		} else if (currentPage.startsWith("viewRestaurantDetails:")) {
 			// Extract restaurantID from the page name and pass it to the RestaurantDetails component
 			const restaurantID = parseInt(currentPage.substring("viewRestaurantDetails:".length));
 			return <RestaurantPreview restaurantID={restaurantID} setPage={setPage}/>;
-		*/} else {
+		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;
 		}
