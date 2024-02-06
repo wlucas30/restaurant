@@ -62,7 +62,7 @@ def beginVerification(userID):
 def generateCode():
     code = ""
     for _ in range(6): # length of code
-        code += str(randint(0, 10))
+        code += str(randint(0, 9))
     return code
         
 # This function sends an email containing the provided code to the provided address
