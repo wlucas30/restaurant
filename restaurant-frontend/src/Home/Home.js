@@ -110,21 +110,21 @@ function Restaurant({ restaurantID, setPage }) {
 
 	// Retrieve restaurant data when the component is first rendered
 	useEffect(() => {
-		// Retrieve restaurant data
-		getRestaurantData(restaurantID)
-			.then((data) => {
+		async function fetchRestaurantDetails() {
+			// Retrieve restaurant data
+			try {
+				const data = await getRestaurantData(restaurantID);
+				const image = await getRestaurantImage(restaurantID);
+	
 				setRestaurantData(data);
+				setRestaurantImage(image);
 				setError(null); // Clear any previous errors
-			})
-			.catch((error) => setError(error));
-		
-		// Retrieve restaurant image
-		getRestaurantImage(restaurantID)
-			.then((data) => {
-				setRestaurantImage(data);
-				setError(null); // Clear any previous errors
-			})
-			.catch((error) => setError(error));
+			} catch (error) {
+				setError(error);
+			}
+		}
+
+		fetchRestaurantDetails();
 	}, [restaurantID]); // This function runs when the restaurantID is set
 
 	// If an error occurred, display it

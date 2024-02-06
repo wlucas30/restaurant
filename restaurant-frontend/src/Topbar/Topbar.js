@@ -3,7 +3,7 @@ import './Topbar.css';
 function UserButton({ setPage }) {
     // This component contains a button which changes the displayed page to account page
     return (
-        <div className="userButton" onClick={() => setPage("account")}>
+        <div className="userButton" onClick={() => setPage("signIn")}>
             <t>Account</t>
         </div>
     );

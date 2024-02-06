@@ -223,11 +223,11 @@ function RestaurantBookingOptionsPane({ restaurantID, setPage }) {
     );
 }
 
-export default function RestaurantPreview({ restaurantID, setPage }) {
+export default function RestaurantPreview({ restaurantID, setPage, backPage }) {
     // This is the root component for the restaurant preview page
     return (
         <>
-            <button className="backButton" onClick={() => setPage("home")}>Back</button>
+            <button className="backButton" onClick={() => backPage()}>Back</button>
             <RestaurantDetailsPane restaurantID={restaurantID} />
             <RestaurantImageCarousel restaurantID={restaurantID} />
             <RestaurantBookingOptionsPane restaurantID={restaurantID} setPage={setPage} />
