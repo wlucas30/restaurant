@@ -1,0 +1,13 @@
+.accountInformationPane, .accountOptionsPane {
+    margin: 2vh;
+}
+
+.accountOptionsPane > button {
+    color: black;
+    font-size: 100%;
+    width: 80%;
+    display: block;
+    margin: 1vh;
+    margin-left: auto;
+    margin-right: auto;
+}

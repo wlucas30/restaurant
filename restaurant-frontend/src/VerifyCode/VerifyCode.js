@@ -50,6 +50,9 @@ function CodeVerificationForm({ userID, setPage }) {
         // Store the authentication token in a cookie
         document.cookie = "authToken=" + authToken + "; Secure; SameSite=Strict; expires=" + date.toUTCString();
 
+        // Also store the userID
+        document.cookie = "userID=" + userID + "; Secure; SameSite=Strict; expires=" + date.toUTCString();
+
         // Move on to the home page
         setPage("home");
     }

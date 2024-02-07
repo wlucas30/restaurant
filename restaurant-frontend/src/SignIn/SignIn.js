@@ -86,6 +86,17 @@ function SignInForm({ setPage }) {
 }
 
 export default function SignIn({ setPage, backPage }) {
+    // Retrieve cookies to check if the user is already signed in
+    useEffect(() => {
+        const cookies = document.cookie.split('; ');
+        const authTokenCookie = cookies.find(cookie => cookie.startsWith('authToken='));
+
+        if (authTokenCookie) {
+            // We assume that the user is signed in if an authentication token is present
+            setPage("accountDetails");
+        }
+    }, []);
+
     return (
         <>
             <button className="backButton" onClick={() => backPage()}>Back</button>

@@ -5,6 +5,7 @@ import Home from './Home/Home';
 import RestaurantPreview from './RestaurantPreview/RestaurantPreview';
 import SignIn from './SignIn/SignIn';
 import VerifyCode from './VerifyCode/VerifyCode';
+import AccountDetails from './AccountDetails/AccountDetails';
 import TopBar from './Topbar/Topbar';
 
 function App() {
@@ -46,6 +47,8 @@ function App() {
 			// Extract the userID from the page name and pass it to the VerifyCode component
 			const userID = parseInt(currentPage.substring("verifyCode:".length));
 			return <VerifyCode userID={userID} setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage == "accountDetails") {
+			return <AccountDetails setPage={setPage} backPage={backPage}/>;
 		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;

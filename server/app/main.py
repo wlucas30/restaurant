@@ -770,11 +770,11 @@ def addRestaurantMenuItem():
         return jsonify(response)
 
     # Authenticate the user
-    """authentication = authenticate(userID, authToken)
+    authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -826,11 +826,11 @@ def deleteRestaurantMenuItem():
         return jsonify(response)
 
     # Authenticate the user
-    """authentication = authenticate(userID, authToken)
+    authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -877,11 +877,11 @@ def uploadMenuItemImage():
         return jsonify(response)
 
     # Authenticate the user
-    """authentication = authenticate(userID, authToken)
+    authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -958,12 +958,12 @@ def createTable():
         response["error"] = "Invalid data format"
         return jsonify(response)
 
-    """# Authenticate the provided token
+    # Authenticate the provided token
     authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -1011,12 +1011,12 @@ def retrieveTable():
         response["error"] = "Invalid data format"
         return jsonify(response)
 
-    """# Authenticate the provided token
+    # Authenticate the provided token
     authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -1066,12 +1066,12 @@ def editTable():
         response["error"] = "Invalid data format"
         return jsonify(response)
 
-    """# Authenticate the provided token
+    # Authenticate the provided token
     authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -1121,12 +1121,12 @@ def deleteRestaurantTable():
         response["error"] = "Invalid data format"
         return jsonify(response)
 
-    """# Authenticate the provided token
+    # Authenticate the provided token
     authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -1172,12 +1172,12 @@ def getReservations():
         response["error"] = "Invalid data format"
         return jsonify(response)
 
-    """# Authenticate the provided token
+    # Authenticate the provided token
     authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -1229,12 +1229,12 @@ def placeOrder():
         response["error"] = "Invalid data format"
         return jsonify(response)
 
-    """# Authenticate the provided token
+    # Authenticate the provided token
     authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Place the order
     order = Order(userID=userID, restaurantID=restaurantID, tableID=tableID, customisation=customisation)
@@ -1283,12 +1283,12 @@ def orderConfirmation():
         response["error"] = "Invalid data format"
         return jsonify(response)
 
-    """# Authenticate the provided token
+    # Authenticate the provided token
     authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Check that the user is a professional
     user = User(userID=userID)
@@ -1460,11 +1460,11 @@ def getRestaurantMetrics():
         response["error"] = "Invalid data format"
 
     # Authenticate the provided token
-    """authentication = authenticate(userID, authToken)
+    authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -1513,11 +1513,11 @@ def setRestaurantOpeningPeriods():
         response["error"] = "Invalid data format"
 
     # Authenticate the provided token
-    """authentication = authenticate(userID, authToken)
+    authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Authentication succeeded, check whether the user is a professional
     user = User(userID=userID)
@@ -1565,11 +1565,11 @@ def getUserEvents():
         response["error"] = "Invalid data format"
 
     # Authenticate the provided token
-    """authentication = authenticate(userID, authToken)
+    authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Initialise a user object
     user = User(userID=userID)
@@ -1608,11 +1608,11 @@ def cancelReservation():
         response["error"] = "Invalid data format"
 
     # Authenticate the provided token
-    """authentication = authenticate(userID, authToken)
+    authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         response["error"] = authentication[1]
-        return jsonify(response)"""
+        return jsonify(response)
 
     # Create database connection
     connection = connect()
