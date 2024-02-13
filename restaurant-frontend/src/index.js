@@ -8,6 +8,7 @@ import VerifyCode from './VerifyCode/VerifyCode';
 import AccountDetails from './AccountDetails/AccountDetails';
 import ChangeEmail from './ChangeEmail/ChangeEmail';
 import TopBar from './Topbar/Topbar';
+import PlaceReview from './PlaceReview/PlaceReview';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page
@@ -52,6 +53,10 @@ function App() {
 			return <AccountDetails setPage={setPage} backPage={backPage}/>;
 		} else if (currentPage == "changeEmail") {
 			return <ChangeEmail setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage.startsWith("placeReview:")) {
+			// Extract restaurantID from the page name and pass it to the PlaceReview component
+			const restaurantID = parseInt(currentPage.substring("placeReview:".length));
+			return <PlaceReview restaurantID={restaurantID} setPage={setPage} backPage={backPage}/>;
 		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;
