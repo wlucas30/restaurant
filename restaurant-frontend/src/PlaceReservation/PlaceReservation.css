@@ -1,0 +1,39 @@
+.reservationOption {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    border: 2px solid rgb(50, 36, 127);
+    border-radius: 15px;
+    padding: 5px;
+}
+
+.reservationOption > h4 {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.reservationOption > button {
+    color: black;
+    font-size: larger;
+    min-width: 20vw;
+}
+
+h1 {
+    margin: 10px;
+}
+
+.reservationPane {
+    margin: 5px;
+}
+
+input, select {
+    display: inline-block;
+    margin: 1vh;
+    padding: 5px;
+    color: black;
+    padding: 5px;
+    border-radius: 7px;
+    border: 1px solid grey;
+    font-size: 100%;
+    font-weight: 400;
+}
