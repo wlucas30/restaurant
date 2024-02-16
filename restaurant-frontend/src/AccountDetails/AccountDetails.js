@@ -66,7 +66,80 @@ function AccountInformationPane({ setPage }) {
             </div>
             <hr />
             <AccountOptionsPane setPage={setPage} professional={professional} setProfessional={setProfessional} />
+            <AccountEventsPane userID={userID} authToken={authToken} />
         </>
+    );
+}
+
+// This component displays all of the user's past reservations and food orders
+function AccountEventsPane({ userID, authToken }) {
+    // State variables for storing the user's past reservations and food orders
+    const [reservations, setReservations] = useState([]);
+    const [orders, setOrders] = useState([]);
+    const [eventError, setEventError] = useState(null);
+
+    // Retrieve the user's past reservations and food orders from the backend
+    useEffect(() => {
+        async function retrieveAccountEvents() {
+            // Make a POST request to the backend to retrieve the user's past reservations and food orders
+            const response = await fetch("https://localhost:8080/getUserEvents", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userID: userID,
+                    authToken: authToken
+                })
+            });
+
+            // Decode the response as JSON
+            const data = await response.json();
+
+            // Check for errors
+            if (data.error) {
+                console.error(data.error);
+            } else {
+                // Return the user's past reservations and food orders to be stored in the state variables
+                return data;
+            }
+        }
+        retrieveAccountEvents()
+            .then((data) => {
+                if (data.error) {
+                    setEventError(data.error)
+                } else {
+                    setReservations(data.reservations);
+                    setOrders(data.foodOrders);
+                }
+            });
+    }, []);
+
+    return (
+        <div className="accountEventsPane">
+            {eventError && <p>{eventError}</p>}
+            <h2>Your past reservations</h2>
+            {reservations.length === 0 && <p>You have no past reservations.</p>}
+            {reservations.map((reservation) => {
+                return (
+                    <div className="reservation">
+                        <p><strong>Restaurant:</strong> {reservation.restaurantName}</p>
+                        <p><strong>Date and time:</strong> {reservation.datetime}</p>
+                    </div>
+                );
+            })}
+            <h2>Your past food orders</h2>
+            {orders.length === 0 && <p>You have no past food orders.</p>}
+            {orders.map((order) => {
+                return (
+                    <div className="order">
+                        <p><strong>Restaurant:</strong> {order.restaurantName}</p>
+                        <p><strong>Order date:</strong> {order.timeOrdered}</p>
+                        <p><strong>Total order price:</strong> {order.price}</p>
+                    </div>
+                );
+            })}
+        </div>
     );
 }
 
@@ -114,6 +187,7 @@ function AccountOptionsPane({ setPage, professional, setProfessional }) {
 }
 
 export default function AccountDetails({ setPage }) {
+
     return (
         <>
             <button className="backButton" onClick={() => setPage("home")}>Go home</button>

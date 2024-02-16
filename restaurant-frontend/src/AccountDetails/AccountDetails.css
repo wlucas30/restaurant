@@ -11,3 +11,14 @@
     margin-left: auto;
     margin-right: auto;
 }
+
+.accountEventsPane {
+    margin: 1vh;
+}
+
+.reservation, .order {
+    background-color: #f2f2f2;
+    margin: 1vh;
+    padding: 1vh;
+    border-radius: 20px;
+}
