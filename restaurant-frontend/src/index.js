@@ -10,6 +10,7 @@ import ChangeEmail from './ChangeEmail/ChangeEmail';
 import TopBar from './Topbar/Topbar';
 import PlaceReview from './PlaceReview/PlaceReview';
 import PlaceReservation from './PlaceReservation/PlaceReservation';
+import PlaceFoodOrder from './PlaceFoodOrder/PlaceFoodOrder';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page
@@ -62,6 +63,10 @@ function App() {
 			// Extract restaurantID from the page name and pass it to the PlaceReservation component
 			const restaurantID = parseInt(currentPage.substring("placeReservation:".length));
 			return <PlaceReservation restaurantID={restaurantID} setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage.startsWith("placeFoodOrder:")) {
+			// Extract restaurantID from the page name and pass it to the PlaceFoodOrder component
+			const restaurantID = parseInt(currentPage.substring("placeFoodOrder:".length));
+			return <PlaceFoodOrder restaurantID={restaurantID} setPage={setPage} backPage={backPage}/>;
 		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;

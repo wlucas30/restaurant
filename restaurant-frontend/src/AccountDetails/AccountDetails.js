@@ -187,7 +187,6 @@ function AccountOptionsPane({ setPage, professional, setProfessional }) {
 }
 
 export default function AccountDetails({ setPage }) {
-
     return (
         <>
             <button className="backButton" onClick={() => setPage("home")}>Go home</button>

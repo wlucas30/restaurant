@@ -1,0 +1,39 @@
+.restaurantMenuPane {
+    margin: 2vh;
+}
+
+.menuItemImage {
+    max-width: 100%;
+}
+
+.quantitySelector {
+    display: flex;
+}
+
+.quantitySelector > button {
+    margin: 0.2vh;
+    padding: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    font-size: larger;
+    width: 2vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.currentOrder {
+    margin: 2vh;
+}
+.currentOrder > h2, .currentOrder > p {
+    padding: 0;
+    margin: 0;
+}
+
+.customisation {
+    width: 93%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
