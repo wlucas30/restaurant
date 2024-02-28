@@ -2,6 +2,10 @@
     margin: 2vh;
 }
 
+.restaurantDetailsPane > h1 {
+    margin: 0;
+}
+
 .reviewPane {
     margin: 2vh;
 }

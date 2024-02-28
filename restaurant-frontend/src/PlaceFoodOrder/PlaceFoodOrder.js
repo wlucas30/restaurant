@@ -83,6 +83,7 @@ function ItemOption({ item, restaurantID, order, setOrder, userID, authToken, se
             }
             <p>{item.description}</p>
             <p><strong>Price:</strong> £{item.price}</p>
+            <p>Calories: {item.calories}kcal</p>
 
             <div className="quantitySelector">
                 <p>Quantity:</p>
@@ -99,7 +100,7 @@ function CurrentOrder({ order, userID, authToken, restaurantID, setPage }) {
     // This component displays the current total price and allows the user to place the order
     const [totalPrice, setTotalPrice] = useState(0);
     const [tableNumber, setTableNumber] = useState(0);
-    const [customisation, setCustomisation] = useState({}); // special requests
+    const [customisation, setCustomisation] = useState(""); // special requests
     const [error, setError] = useState(null);
 
     // Create an effect to update the total price when the order changes
@@ -142,8 +143,8 @@ function CurrentOrder({ order, userID, authToken, restaurantID, setPage }) {
         });
 
         // Decode the response as JSON
-        const data = response.json();
-        if (data.error) {
+        const data = await response.json();
+        if (data.error != null) {
             setError(data.error);
         } else {
             // The order was successfully placed, so navigate to the order status page

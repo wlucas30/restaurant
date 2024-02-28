@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import Home from './Home/Home';
@@ -11,6 +11,7 @@ import TopBar from './Topbar/Topbar';
 import PlaceReview from './PlaceReview/PlaceReview';
 import PlaceReservation from './PlaceReservation/PlaceReservation';
 import PlaceFoodOrder from './PlaceFoodOrder/PlaceFoodOrder';
+import OrderStatus from './OrderStatus/OrderStatus';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page
@@ -67,6 +68,10 @@ function App() {
 			// Extract restaurantID from the page name and pass it to the PlaceFoodOrder component
 			const restaurantID = parseInt(currentPage.substring("placeFoodOrder:".length));
 			return <PlaceFoodOrder restaurantID={restaurantID} setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage.startsWith("orderStatus:")) {
+			// Extract foodOrderID from the page name and pass it to the OrderStatus component
+			const foodOrderID = parseInt(currentPage.substring("orderStatus:".length));
+			return <OrderStatus foodOrderID={foodOrderID} setPage={setPage} backPage={backPage}/>;
 		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;

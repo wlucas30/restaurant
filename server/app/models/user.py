@@ -91,6 +91,14 @@ class User:
         if connection[0] is not None:
             with connection[0] as connection:
                 with connection.cursor() as cursor:
+                    sql = "SELECT * FROM User WHERE email = %s;"
+                    cursor.execute(sql, (new_email,))
+                    result = cursor.fetchone()
+                    if result is not None:
+                        # The provided email is already in use
+                        self.error = "The provided email is already in use"
+                        return
+
                     # Change the stored email in the database
                     sql = "UPDATE User SET email = %s, verified=0 WHERE userID = %s;"
                     # Delete any stored authentication tokens or verification codes
