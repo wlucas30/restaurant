@@ -1629,6 +1629,35 @@ def cancelReservation():
     response["success"] = True
     return jsonify(response)
 
+@app.route("/getRestaurantID", methods=["POST"])
+def getRestaurantID():
+    # This function returns the restaurantID associated with a given professional userID
+    response = {
+        "restaurantID": None,
+        "error": None
+    }
+
+    userID = None
+    try:
+        data = request.json
+        userID = data["userID"]
+    except KeyError:
+        response["error"] = "Missing required parameter"
+        return jsonify(response)
+    except ValueError:
+        response["error"] = "Invalid data format"
+        return jsonify(response)
+
+    # Retrieve the restaurantID
+    user = ProfessionalUser(userID)
+
+    if not user.error:
+        response["restaurantID"] = user.restaurantID
+    else:
+        response["error"] = user.error
+
+    return jsonify(response)
+
 # This runs the app so that POST requests can be received
 if __name__ == "__main__":
     app.run(host="localhost", port=8080, ssl_context=("/Users/wl/Documents/restaurant/restaurant-frontend/localhost+1.pem", "/Users/wl/Documents/restaurant/restaurant-frontend/localhost+1-key.pem"))

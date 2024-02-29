@@ -12,6 +12,7 @@ import PlaceReview from './PlaceReview/PlaceReview';
 import PlaceReservation from './PlaceReservation/PlaceReservation';
 import PlaceFoodOrder from './PlaceFoodOrder/PlaceFoodOrder';
 import OrderStatus from './OrderStatus/OrderStatus';
+import RestaurantControlPanel from './ControlPanel/ControlPanel';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page
@@ -72,6 +73,8 @@ function App() {
 			// Extract foodOrderID from the page name and pass it to the OrderStatus component
 			const foodOrderID = parseInt(currentPage.substring("orderStatus:".length));
 			return <OrderStatus foodOrderID={foodOrderID} setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage == "restaurantControlPanel") {
+			return <RestaurantControlPanel setPage={setPage} backPage={backPage}/>;
 		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;
