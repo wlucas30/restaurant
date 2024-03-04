@@ -1,0 +1,22 @@
+.orderQueuePane {
+    margin: 2vh;
+}
+
+.orderElement {
+    margin: 3%;
+    padding: 1%;
+    background-color: #f2f2f2;
+    border-radius: 20px;
+    width: 60%;
+}
+
+.orderOptions {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px;
+}
+
+.orderOptions > button {
+    width: 40%;
+    font-size: larger;
+}

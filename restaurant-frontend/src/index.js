@@ -13,6 +13,7 @@ import PlaceReservation from './PlaceReservation/PlaceReservation';
 import PlaceFoodOrder from './PlaceFoodOrder/PlaceFoodOrder';
 import OrderStatus from './OrderStatus/OrderStatus';
 import RestaurantControlPanel from './ControlPanel/ControlPanel';
+import OrderQueue from './OrderQueue/OrderQueue';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page
@@ -75,6 +76,8 @@ function App() {
 			return <OrderStatus foodOrderID={foodOrderID} setPage={setPage} backPage={backPage}/>;
 		} else if (currentPage == "restaurantControlPanel") {
 			return <RestaurantControlPanel setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage == "orderQueue") {
+			return <OrderQueue setPage={setPage} backPage={backPage}/>;
 		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;
