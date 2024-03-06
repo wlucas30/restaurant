@@ -1,0 +1,20 @@
+.restaurantDetailsForm {
+    margin: 2vh;
+}
+
+.restaurantDetailsForm > input {
+    display: block;
+}
+
+.restaurantDetailsForm > textarea {
+    min-width: 50%;
+    max-width: 50%;
+    min-height: 20vh;   
+    max-height: 20vh;
+    font-size: large;
+}
+
+.restaurantDetailsForm > button {
+    color: black;
+    font-size: 100%;
+}
