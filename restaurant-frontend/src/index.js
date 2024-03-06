@@ -16,6 +16,7 @@ import RestaurantControlPanel from './ControlPanel/ControlPanel';
 import OrderQueue from './OrderQueue/OrderQueue';
 import ChangeRestaurantDetails from './ChangeRestaurant/ChangeRestaurant';
 import ManageRestaurantImages from './ManageRestaurantImages/ManageRestaurantImages';
+import ManageOpeningHours from './ManageOpeningHours/ManageOpeningHours';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page

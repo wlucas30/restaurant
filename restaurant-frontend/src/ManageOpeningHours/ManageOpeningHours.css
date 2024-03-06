@@ -1,0 +1,22 @@
+.openingHoursPane {
+    margin: 2vh;
+}
+
+.openingHoursDay {
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    width: 30%;
+}
+
+.openingHoursPane > button {
+    padding: 10px;
+    font-size: large;
+    background-color: white;
+    border: 1px solid #0f0f0f;
+    border-radius: 10px;
+}

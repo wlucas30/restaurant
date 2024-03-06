@@ -126,9 +126,13 @@ def deleteInvalidReservations(restaurantID, connection, cursor):
             "openingTime": openingTime,
             "closingTime": closingTime
         }
-
-    print(restaurantID)
-    print(openingPeriods)
+    for day in range(1, 8):
+        if day not in openingPeriods:
+            # The restaurant is not open on the day, so store the opening and closing times as None
+            openingPeriods[day] = {
+                "openingTime": None,
+                "closingTime": None
+            }
 
     # Retrieve all of the restaurant's reservations
     sql = """
@@ -140,14 +144,17 @@ def deleteInvalidReservations(restaurantID, connection, cursor):
     """
     cursor.execute(sql, (restaurantID,))
     result = cursor.fetchall()
-    print(result)
     # Iterate through each reservation and delete it if it is outside of the restaurant's opening hours
     for row in result:
         reservationID, rdatetime, userEmail = row
         dayOfWeek = (rdatetime.weekday()) + 1 # avoids 0 based indexing
         openingTime = openingPeriods[dayOfWeek]["openingTime"]
         # Subtract 1 hour from the closing time to account for the time taken to fulfill the order
-        closingTime = openingPeriods[dayOfWeek]["closingTime"] - timedelta(hours=1)
+        try:
+            closingTime = openingPeriods[dayOfWeek]["closingTime"] - timedelta(hours=1)
+        except:
+            openingTime = "00:00:01"
+            closingTime = "00:00:01"
 
         # Convert opening and closing time timedelta objects to time objects
         openingTime = datetime.strptime(str(openingTime), "%H:%M:%S").time()
