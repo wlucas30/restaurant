@@ -8,11 +8,11 @@ imageStore = "/Users/wl/Documents/restaurant/server/static/restaurant_images"
 # This function allows a saved restaurantImage to be deleted from the filesystem
 def deleteRestaurantImage(userID, authToken, imageName):
     # First authenticate the provided authentication token
-    """authentication = authenticate(userID, authToken)
+    authentication = authenticate(userID, authToken)
     if not authentication[0]:
         # Authentication failed
         return (False, authentication[1])
-    """
+
     # Check that the user is a professional and get their restaurantID
     restaurantID = None
     user = User(userID=userID)
@@ -45,9 +45,13 @@ def deleteRestaurantImage(userID, authToken, imageName):
     # Decrement each image name by 1 where the image number is greater than the deleted image
     for image in os.listdir(filepath):
         # Check if the image is greater than the deleted image
-        if int(image[:-4]) > int(imageName):
-            # The image is greater than the deleted image, so decrement the image name by 1
-            os.rename(filepath+"/"+image, filepath+"/"+str(int(image[:-4])-1)+".jpg")
+        try:
+            if int(image[:-4]) > int(imageName):
+                # The image is greater than the deleted image, so decrement the image name by 1
+                os.rename(filepath+"/"+image, filepath+"/"+str(int(image[:-4])-1)+".jpg")
+        except:
+            # The image name is not a number, so skip it
+            continue
 
     # The image has been deleted
     return (True, None)

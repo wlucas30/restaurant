@@ -1,0 +1,30 @@
+.restaurantImagesPane {
+    margin: 2vh;
+}
+
+.restaurantImageFrame {
+    padding: 10px;
+    margin: 1vh;
+    border: 1px solid black;
+    border-radius: 10px;
+    display: block;
+    min-width: 30%;
+    max-width: 30%;
+    margin-right: auto;
+}
+
+.restaurantImageFrame > button {
+    font-size: large;
+    border: 1px solid salmon;
+    border-radius: 10px;
+    background-color: #ffffff;
+}
+
+.restaurantImage {
+    width: 100%;
+}
+
+.existingImagesContainer {
+    display: block;
+}
+

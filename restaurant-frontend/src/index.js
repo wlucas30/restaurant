@@ -15,6 +15,7 @@ import OrderStatus from './OrderStatus/OrderStatus';
 import RestaurantControlPanel from './ControlPanel/ControlPanel';
 import OrderQueue from './OrderQueue/OrderQueue';
 import ChangeRestaurantDetails from './ChangeRestaurant/ChangeRestaurant';
+import ManageRestaurantImages from './ManageRestaurantImages/ManageRestaurantImages';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page
@@ -81,7 +82,11 @@ function App() {
 			return <OrderQueue setPage={setPage} backPage={backPage}/>;
 		} else if (currentPage == "changeRestaurantDetails") {
 			return <ChangeRestaurantDetails setPage={setPage} backPage={backPage}/>;
-		} else {
+		} else if (currentPage == "manageRestaurantImages") {
+			return <ManageRestaurantImages setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage == "manageOpeningHours") {
+			return <ManageOpeningHours setPage={setPage} backPage={backPage} />;
+	 	} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;
 		}
