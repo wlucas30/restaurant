@@ -93,7 +93,11 @@ def validate(menuSection, name, description, calories, price):
 
     # Check that the price is a float
     if type(price) is not float:
-        return (False, "The price must be a float")
+        # Try to convert the price to a float if possible
+        try:
+            price = float(price)
+        except:
+            return (False, "The price must be a float")
     # Check that the price has no more than 2 decimal places
     if len(str(price).split(".")[1]) > 2:
         return (False, "The price must have no more than 2 decimal places")
