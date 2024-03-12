@@ -20,6 +20,7 @@ import ManageOpeningHours from './ManageOpeningHours/ManageOpeningHours';
 import ManageMenu from './ManageMenu/ManageMenu';
 import ManageTables from './ManageTables/ManageTables';
 import ViewTableBill from './ViewTableBill/ViewTableBill';
+import ViewReservations from './ViewReservations/ViewReservations';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page
@@ -98,6 +99,8 @@ function App() {
 			// Extract tableID from the page name and pass it to the ViewTableBill component
 			const tableID = parseInt(currentPage.substring("viewTableBill:".length));
 			return <ViewTableBill tableID={tableID} setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage == "viewReservations") {
+			return <ViewReservations setPage={setPage} backPage={backPage}/>;
 		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;
