@@ -9,7 +9,7 @@ def getUnfulfilledOrders(restaurantID, foodOrderID=0): # default value of 0 will
             cursor = connection.cursor()
             # Retrieve unfulfilled orders after the provided foodOrderID
             sql = """
-            SELECT foodOrderID, userID, restaurantID, tableID, price, timeOrdered, confirmed
+            SELECT foodOrderID, userID, restaurantID, tableID, price, timeOrdered, confirmed, customisation
             FROM FoodOrder
             WHERE restaurantID = %s AND foodOrderID > %s AND timeFulfilled IS NULL;
             """
@@ -25,6 +25,7 @@ def getUnfulfilledOrders(restaurantID, foodOrderID=0): # default value of 0 will
                 "price": order[4],
                 "timeOrdered": order[5],
                 "confirmed": order[6] == 1, # converts 0/1 to False/True
+                "customisation": order[7]
             } for order in result]
 
             # Retrieve all of the OrderItems for each order

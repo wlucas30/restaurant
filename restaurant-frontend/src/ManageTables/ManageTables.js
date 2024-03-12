@@ -164,7 +164,7 @@ function RestaurantTable({ table, userID, authToken, setPage }) {
                 <input type="number" name="capacity" value={capacity}
                 onChange={(c) => setCapacity(c.target.value)} />
 
-                <button onClick={() => setPage("viewTableBill:" + table.tableID)}>View bill</button>
+                <button onClick={() => setPage("viewTableBill:" + table.tableNumber)}>View bill</button>
                 <button onClick={submitChanges}>Submit table changes</button>
                 <button onClick={deleteTable}>Delete table</button>
             </div>

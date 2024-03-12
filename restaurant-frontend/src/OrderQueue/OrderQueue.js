@@ -161,6 +161,7 @@ function Order({ order, dequeueOrder, userID, authToken }) {
             <div className="orderElement">
                 {error && <p>{error}</p>}
                 <p>Order ID: {order.foodOrderID}</p>
+                <p>Customisation request: {order.customisation}</p>
                 <p>Table number: {order.tableID}</p>
                 <p>Status: {status}</p>
                 <p>Contents:</p>

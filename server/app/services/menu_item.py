@@ -203,7 +203,7 @@ def getMenu(restaurantID):
         with connection[0] as connection:
             with connection.cursor() as cursor:
                 # Retrieve all menu items for the restaurant
-                sql = "SELECT * FROM MenuItem WHERE restaurantID = %s GROUP BY section;"
+                sql = "SELECT * FROM MenuItem WHERE restaurantID = %s;"
                 cursor.execute(sql, (restaurantID,))
                 result = cursor.fetchall()
                 menu = []

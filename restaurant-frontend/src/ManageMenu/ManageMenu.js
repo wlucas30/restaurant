@@ -5,6 +5,7 @@ function MenuManagementPane({ userID, authToken, restaurantID }) {
     // State variable for storing the restaurant's existing menu
     const [menu, setMenu] = useState([]);
     const [menuError, setMenuError] = useState(null);
+    const[tempMenu, setTempMenu] = useState(null); // used for triggering a refresh of the menu
 
     // Effect which retrieves the restaurant's menu once the restaurantID
     useEffect(() => {
@@ -26,7 +27,7 @@ function MenuManagementPane({ userID, authToken, restaurantID }) {
             }
         }
         fetchMenu();
-    }, [restaurantID, menu]);
+    }, [restaurantID, tempMenu]);
 
     return (
         <div className="menuManagementPane">
@@ -38,12 +39,12 @@ function MenuManagementPane({ userID, authToken, restaurantID }) {
                 <MenuItem item={item} restaurantID={restaurantID} userID={userID} authToken={authToken} />
             )}<hr />
             <NewItemContainer restaurantID={restaurantID} userID={userID} authToken={authToken} 
-            setMenu={setMenu} />
+            setTempMenu={setTempMenu} />
         </div>
     );
 }
 
-function NewItemContainer({ restaurantID, userID, authToken, setMenu }) {
+function NewItemContainer({ restaurantID, userID, authToken, setTempMenu }) {
     // State variables for storing the details of the new item
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -87,7 +88,7 @@ function NewItemContainer({ restaurantID, userID, authToken, setMenu }) {
             setSection("");
 
             // Trigger a refresh of the menu by setting the menu state variable to a dummy value
-            setMenu(["refresh"]);
+            setTempMenu(["refresh"]);
         }
     }
 

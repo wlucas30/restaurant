@@ -19,6 +19,7 @@ import ManageRestaurantImages from './ManageRestaurantImages/ManageRestaurantIma
 import ManageOpeningHours from './ManageOpeningHours/ManageOpeningHours';
 import ManageMenu from './ManageMenu/ManageMenu';
 import ManageTables from './ManageTables/ManageTables';
+import ViewTableBill from './ViewTableBill/ViewTableBill';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page
@@ -93,6 +94,10 @@ function App() {
 			return <ManageMenu setPage={setPage} backPage={backPage}/>;
 		} else if (currentPage == "manageTables") {
 			return <ManageTables setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage.startsWith("viewTableBill:")) {
+			// Extract tableID from the page name and pass it to the ViewTableBill component
+			const tableID = parseInt(currentPage.substring("viewTableBill:".length));
+			return <ViewTableBill tableID={tableID} setPage={setPage} backPage={backPage}/>;
 		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;
