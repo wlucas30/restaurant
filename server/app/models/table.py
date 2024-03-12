@@ -83,6 +83,10 @@ class Table:
         try:
             self.__cursor.execute(sql, (self.__restaurantID, self.__tableID, self.__tableNumber, self.__capacity))
             self.__connection.commit()
+
+            # Retrieve the value of the new tableID
+            self.__tableID = self.__cursor.lastrowid
+
             return True
         except Exception as e:
             # An error occurred inserting the table
@@ -199,6 +203,10 @@ class Table:
             self.__connection.rollback()
             self.error = f"An error occurred deleting the table: {e}"
             return False
+
+    def getTableID(self):
+        # This function returns the tableID of the table
+        return self.__tableID
 
     def __del__(self):
         # This destructor closes the database connection

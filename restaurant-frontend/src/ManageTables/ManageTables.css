@@ -1,0 +1,21 @@
+.tableManagementPane {
+    margin: 2vh;
+}
+
+.tableContainer {
+    border: 1px solid #a6a6a6;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+}  
+.tableContainer > button {
+    float: right;
+    font-size: medium;
+    padding: 10px;
+    margin-top: auto;
+    margin-bottom: auto;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin: 5px;
+}

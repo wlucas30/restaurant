@@ -942,7 +942,7 @@ def createTable():
     """
     # Prepares response to be returned to the client
     response = {
-        "success": False,
+        "tableID": None,
         "error": None
     }
 
@@ -984,7 +984,7 @@ def createTable():
         # An error has occurred
         response["error"] = table.error
     else:
-        response["success"] = True
+        response["tableID"] = table.getTableID()
 
     return jsonify(response)
 

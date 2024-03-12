@@ -18,6 +18,7 @@ import ChangeRestaurantDetails from './ChangeRestaurant/ChangeRestaurant';
 import ManageRestaurantImages from './ManageRestaurantImages/ManageRestaurantImages';
 import ManageOpeningHours from './ManageOpeningHours/ManageOpeningHours';
 import ManageMenu from './ManageMenu/ManageMenu';
+import ManageTables from './ManageTables/ManageTables';
 
 function App() {
 	// Initialise a state variable which determines the currently displayed page
@@ -90,6 +91,8 @@ function App() {
 			return <ManageOpeningHours setPage={setPage} backPage={backPage} />;
 		} else if (currentPage == "manageMenu") {
 			return <ManageMenu setPage={setPage} backPage={backPage}/>;
+		} else if (currentPage == "manageTables") {
+			return <ManageTables setPage={setPage} backPage={backPage}/>;
 		} else {
 			// Default page is home
 			return <Home setPage={setPage}/>;

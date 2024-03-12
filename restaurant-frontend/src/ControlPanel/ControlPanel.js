@@ -35,7 +35,6 @@ function ControlPanelOptions({ setPage, backPage, userID, authToken }) {
             <button onClick={() => setPage("manageRestaurantImages")}>Manage restaurant images</button>
             <button onClick={() => setPage("manageOpeningHours")}>Manage opening hours</button>
             <button onClick={() => setPage("manageMenu")}>Manage menu</button>
-            <button onClick={() => setPage("metrics")}>View restaurant metrics</button>
             <button onClick={() => setPage("orderQueue")}>View order queue</button>
             <button onClick={() => setPage("manageTables")}>Manage tables</button>
             <button onClick={() => setPage("viewReservations")}>View reservations</button>
